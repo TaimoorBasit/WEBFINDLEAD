@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import {
@@ -48,7 +48,7 @@ const MockLeadCard = ({ name, category, status, delay }: { name: string, categor
   </div>
 );
 
-export default function Dashboard() {
+function DashboardContent() {
   const [stats, setStats] = useState({
     totalLeads: 0,
     noWebsite: 0,
@@ -109,32 +109,42 @@ export default function Dashboard() {
               href="/search"
               className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-base hover:shadow-[0_12px_24px_rgba(99,102,241,0.3)] transition-all hover:-translate-y-0.5 active:scale-95"
             >
-              Find Lead
+              Start Free Scan
             </a>
             <a
               href="/leads"
-              className="px-8 py-5 bg-card border border-border rounded-2xl font-bold hover:bg-muted transition-all text-foreground"
+              className="px-6 py-3 bg-white border border-border text-foreground rounded-xl font-bold text-base hover:bg-muted/50 transition-all flex items-center gap-2 group"
             >
-              View Saved Leads
+              My Dashboard
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
+          </div>
+
+          <div className="flex items-center gap-6 mt-4">
+            <div className="flex flex-col">
+              <span className="text-2xl font-black">2.4k+</span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Businesses found</span>
+            </div>
+            <div className="h-8 w-px bg-border" />
+            <div className="flex flex-col">
+              <span className="text-2xl font-black">98%</span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-black">Accuracy</span>
+            </div>
           </div>
         </div>
 
-        <div className="relative flex items-center justify-center min-h-[400px]">
-          {/* Decorative Elements */}
-          <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150" />
-
+        <div className="relative flex items-center justify-center p-8">
           <RadarPulse />
 
-          {/* Floating Mock Leads */}
-          <div className="absolute -top-10 -right-4 hidden xl:block w-72 transform rotate-3 hover:rotate-0 transition-transform duration-500 cursor-default">
-            <MockLeadCard name="Smith & Co Dentistry" category="Medical" status="NO_WEBSITE" delay="delay-100" />
+          {/* Floating Result Examples */}
+          <div className="absolute top-0 right-0 z-20">
+            <MockLeadCard name="Elite Plumbing" category="Service" status="NO_WEBSITE" delay="delay-150" />
           </div>
-          <div className="absolute top-24 -left-12 hidden xl:block w-64 transform -rotate-6 hover:rotate-0 transition-transform duration-500 cursor-default">
-            <MockLeadCard name="Urban Spa Retreat" category="Wellness" status="LOW_QUALITY" delay="delay-300" />
+          <div className="absolute bottom-10 -left-10 z-20">
+            <MockLeadCard name="Green Garden" category="Landscaping" status="LOW_QUALITY" delay="delay-300" />
           </div>
-          <div className="absolute bottom-0 right-10 hidden xl:block w-60 transform rotate-2 hover:rotate-0 transition-transform duration-500 cursor-default">
-            <MockLeadCard name="The Local Bistro" category="Restaurant" status="NO_WEBSITE" delay="delay-500" />
+          <div className="absolute top-1/2 -right-12 z-20">
+            <MockLeadCard name="Bistro 42" category="Restaurant" status="NO_WEBSITE" delay="delay-500" />
           </div>
         </div>
       </section>
@@ -234,149 +244,103 @@ export default function Dashboard() {
         {/* Market Penetration */}
         <div className="bg-gradient-to-br from-primary/20 via-primary/5 to-transparent border border-primary/20 rounded-[2.5rem] p-10 relative overflow-hidden group h-full flex flex-col justify-between">
           <div className="relative z-10">
-            <div className="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center mb-8 shadow-2xl shadow-primary/40">
-              <BarChart3 className="w-7 h-7" />
+            <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-500">
+              <BarChart3 className="text-white w-7 h-7" />
             </div>
-            <h3 className="text-2xl font-black mb-4 tracking-tighter">Market Penetration</h3>
-            <p className="text-muted-foreground text-sm font-medium leading-relaxed mb-10">
-              Our scanners indicate that <strong>over 40%</strong> of local service businesses in your target area are operating with substandard or non-existent web presences.
+            <h3 className="text-2xl font-black tracking-tight mb-4 leading-tight">Market <br />Penetration</h3>
+            <p className="text-foreground/70 text-sm font-medium leading-relaxed">
+              Target <strong>High-Intent</strong> local niches with zero digital overhead.
             </p>
           </div>
-          <a href="/search" className="flex items-center gap-4 text-primary font-black uppercase text-xs tracking-[0.2em] group-hover:gap-6 transition-all relative z-10">
-            Initialize Scan <ArrowRight className="w-4 h-4" />
-          </a>
-          <Target className="absolute -bottom-20 -right-20 w-80 h-80 text-primary/5 group-hover:scale-110 transition-transform duration-1000" />
+          <div className="mt-8 pt-6 border-t border-primary/10">
+            <div className="flex items-center justify-between group/link cursor-pointer">
+              <span className="text-xs font-black uppercase tracking-widest text-primary">View Report</span>
+              <ArrowRight className="w-4 h-4 text-primary group-hover/link:translate-x-1 transition-transform" />
+            </div>
+          </div>
         </div>
 
         {/* Pro Scanner Card */}
-        <div className="relative group h-full">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-600 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-          <div className="relative bg-card border border-primary/20 p-8 rounded-[2.5rem] shadow-2xl h-full flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-black">Pro Scanner</h3>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Monthly</p>
-                </div>
-                <div className="bg-primary/10 text-primary px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-primary/20">
-                  Popular
-                </div>
+        <div className="lg:col-span-2 bg-card border border-border rounded-[2.5rem] p-4 group relative overflow-hidden flex flex-col">
+          <div className="flex-1 p-8">
+            <div className="flex justify-between items-start mb-10">
+              <div>
+                <span className="px-4 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-primary/20">Recommended Integration</span>
+                <h3 className="text-5xl font-black tracking-tighter mt-4 flex items-baseline gap-2">
+                  $20<span className="text-sm text-muted-foreground tracking-normal font-bold">/mo</span>
+                </h3>
               </div>
-
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-black tracking-tighter">$20</span>
-                <span className="text-muted-foreground font-bold text-sm">/month</span>
+              <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center border border-border group-hover:rotate-12 transition-all duration-500">
+                <Target className="text-foreground w-7 h-7" />
               </div>
-
-              <ul className="space-y-3 mb-6">
-                {[
-                  "75 High-Quality Leads",
-                  "Instant Contact Details",
-                  "Export to CSV",
-                  "Priority Support",
-                  "Commercial Rights"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-bold text-foreground/80">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                      <Check className="w-3 h-3" />
-                    </div>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
             </div>
 
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  if (session) {
-                    setModalPlan("Pro Scanner");
-                    setShowPricing(true);
-                  } else {
-                    router.push('/auth/signup?plan=starter');
-                  }
-                }}
-                className="block w-full py-4 text-center bg-primary text-primary-foreground rounded-xl font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] transition-all transform hover:-translate-y-1"
-              >
-                Get Started
-              </button>
-              <p className="text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                Cancel Anytime
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                "Unlimited Website Audits",
+                "Advanced SEO Analysis",
+                "Custom Pitch Templates",
+                "Export to CRM (CSV/PDF)",
+                "Bulk Scanning",
+                "Dedicated API Access"
+              ].map((feature, i) => (
+                <div key={i} className="flex items-center gap-3 group/item">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all">
+                    <Check className="w-3 h-3 text-emerald-600 group-hover/item:text-white" />
+                  </div>
+                  <span className="text-sm font-bold text-foreground/80">{feature}</span>
+                </div>
+              ))}
             </div>
           </div>
+
+          <button
+            onClick={() => { setModalPlan('Pro Scanner'); setShowPricing(true); }}
+            className="w-full bg-foreground text-background py-6 text-sm font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all duration-500 rounded-2xl"
+          >
+            Activate Pro Scanner
+          </button>
         </div>
 
         {/* Agency Plan Card */}
-        <div className="relative group h-full">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-[2.5rem] blur-xl opacity-10 group-hover:opacity-30 transition-opacity" />
-          <div className="relative bg-card border border-border p-8 rounded-[2.5rem] shadow-xl h-full flex flex-col justify-between hover:border-blue-500/30 transition-colors">
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-2xl font-black">Agency</h3>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Monthly</p>
-                </div>
-              </div>
-
-              <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-black tracking-tighter">$99</span>
-                <span className="text-muted-foreground font-bold text-sm">/month</span>
-              </div>
-
-              <ul className="space-y-3 mb-6">
-                {[
-                  "Unlimited Leads",
-                  "Priority Support",
-                  "Advanced Filters",
-                  "API Access",
-                  "White Label Reports"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm font-bold text-foreground/80">
-                    <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-                      <Check className="w-3 h-3" />
-                    </div>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+        <div className="bg-slate-900 border border-white/10 rounded-[2.5rem] p-10 group relative overflow-hidden flex flex-col justify-between">
+          <div className="relative z-10">
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">Enterprise</span>
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             </div>
+            <h3 className="text-3xl font-black tracking-tight text-white mb-2 leading-tight">Agency <br />Force</h3>
+            <p className="text-white/50 text-sm font-medium mb-8">Scale your outreach with unlimited seats.</p>
 
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  if (session) {
-                    setModalPlan("Agency");
-                    setShowPricing(true);
-                  } else {
-                    router.push('/auth/signup?plan=agency');
-                  }
-                }}
-                className="block w-full py-4 text-center bg-slate-900 text-white rounded-xl font-bold text-sm uppercase tracking-widest hover:shadow-lg transition-all transform hover:-translate-y-1"
-              >
-                Get Agency
-              </button>
-              <p className="text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                Cancel Anytime
-              </p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-white/80 italic">White-label Reports</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-white/80 italic">Team Management</span>
+              </div>
             </div>
           </div>
+
+          <button
+            onClick={() => { setModalPlan('Agency'); setShowPricing(true); }}
+            className="w-full bg-white/10 hover:bg-white/20 border border-white/10 text-white py-4 rounded-xl text-xs font-black uppercase tracking-widest mt-8 transition-all"
+          >
+            Go Agency
+          </button>
         </div>
+      </div>
 
-        {/* Philosophy - Redesigned */}
-        <div className="relative group h-full bg-card border border-border rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden">
-          {/* Enhanced Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-primary/5 opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]" />
-
-          {/* Content */}
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-amber-500/20 rotate-3 group-hover:rotate-6 transition-transform duration-500">
-              <Star className="w-8 h-8 text-white fill-white" />
-            </div>
-
+      {/* Philosophy Section */}
+      <div className="mt-24 relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-24 bg-gradient-to-b from-primary/0 to-primary/40" />
+        <div className="pt-32 pb-24 text-center max-w-3xl mx-auto px-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full border border-amber-500/20 text-[10px] font-black uppercase tracking-widest mb-8">
+            <Star className="w-3 h-3 fill-amber-500" /> Our Philosophy
+          </div>
+          <div className="flex flex-col items-center">
             <h3 className="text-2xl lg:text-3xl font-black mb-8 tracking-tighter leading-tight text-foreground drop-shadow-sm">
               &quot;Your mission is to bridge the gap between their <span className="text-primary bg-primary/10 px-2 rounded-lg">business excellence</span> and their <span className="text-amber-500 bg-amber-500/10 px-2 rounded-lg">digital invisibility</span>.&quot;
             </h3>
@@ -392,5 +356,17 @@ export default function Dashboard() {
 
       <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} initialPlan={modalPlan} />
     </div >
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
