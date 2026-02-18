@@ -24,48 +24,57 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Invalid credentials");
                 }
 
-                const user = await prisma.user.findFirst({
-                    where: {
-                        OR: [
-                            { email: credentials.email },
-                            { username: credentials.email }, // Allow login with username in "email" field
-                        ]
-                    },
-                });
+                try {
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            OR: [
+                                { email: credentials.email },
+                                { username: credentials.email }, // Allow login with username in "email" field
+                            ]
+                        },
+                    });
 
-                if (!user) {
-                    throw new Error("Account not found. Please register.");
+                    if (!user) {
+                        throw new Error("Account not found. Please register.");
+                    }
+
+                    if (!user.password) {
+                        throw new Error("Account has no password set. Try social login.");
+                    }
+
+                    const isCorrectPassword = await bcrypt.compare(
+                        credentials.password,
+                        user.password
+                    );
+
+                    if (!isCorrectPassword) {
+                        throw new Error("Incorrect password. Please try again.");
+                    }
+
+                    if (user.isBlocked) {
+                        throw new Error("Account is blocked. Contact support.");
+                    }
+
+                    if (!user.isVerified) {
+                        throw new Error("Email not verified. Please check your inbox.");
+                    }
+
+                    return {
+                        id: user.id,
+                        name: user.name || "",
+                        email: user.email || "",
+                        role: user.role || "USER",
+                        plan: user.plan || "FREE",
+                        image: user.image || "",
+                    };
+                } catch (error: any) {
+                    console.error("Auth authorize error:", error);
+                    // If it's a known prisma error or connection error, provide better context
+                    if (error.message.includes("Can't reach database")) {
+                        throw new Error("Database connection timed out. Please check IP Whitelist.");
+                    }
+                    throw error; // Re-throw the original error (like "Account not found")
                 }
-
-                if (!user.password) {
-                    throw new Error("Account has no password set. Try social login.");
-                }
-
-                const isCorrectPassword = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isCorrectPassword) {
-                    throw new Error("Incorrect password. Please try again.");
-                }
-
-                if (user.isBlocked) {
-                    throw new Error("Account is blocked. Contact support.");
-                }
-
-                if (!user.isVerified) {
-                    throw new Error("Email not verified. Please check your inbox.");
-                }
-
-                return {
-                    id: user.id,
-                    name: user.name || "",
-                    email: user.email || "",
-                    role: user.role || "USER",
-                    plan: user.plan || "FREE",
-                    image: user.image || "",
-                };
             },
         }),
     ],
