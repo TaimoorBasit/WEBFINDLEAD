@@ -1,0 +1,48 @@
+{
+    "name": "WebFindLead - Google Maps Scanner",
+    "version": "1.0.0",
+    "manifest_version": 3,
+    "description": "Extract and sync local business leads directly from Google Maps to your WebFindLead dashboard.",
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "storage",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://www.google.com/maps/*",
+        "https://www.google.com/search*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "https://webfindlead.com/*"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Scan Leads"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.google.com/maps/*",
+                "https://www.google.com/search*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "popup.css"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}

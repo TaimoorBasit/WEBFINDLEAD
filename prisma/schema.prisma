@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  username      String?   @unique
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("USER") // "USER", "ADMIN"
+  leadsBalance  Int       @default(3) // Acts as trialLeadsRemaining
+  subscriptionStatus String @default("trial") // "trial", "active", "expired"
+  planType      String    @default("trial") // "trial", "basic", "pro"
+  plan          String?   // "FREE", "PRO_MONTHLY_20" (Legacy mapped to planType)
+  isBlocked     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  isVerified    Boolean   @default(false)
+  otpHash       String?
+  otpExpiry     DateTime?
+  otpAttempts   Int       @default(0)
+  otpResendCount Int      @default(0)
+  lastOtpSentAt DateTime?
+  
+  updatedAt     DateTime  @updatedAt
+
+  cardLast4     String?
+  cardBrand     String?
+  
+  accounts      Account[]
+  sessions      Session[]
+  leads         Lead[]
+  helpRequests  HelpRequest[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Lead {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  name          String
+  category      String?
+  address       String?
+  phone         String?
+  email         String?
+  placeId       String?  // unique per user? or global? Let's make it unique generally if possible, but maybe unique per user is safer if users can share leads? unique constraint was present before.
+  mapsUrl       String?
+  website       String?
+  websiteStatus String   @default("NO_WEBSITE")
+  status        String   @default("NEW") // "NEW", "CONTACTED", "INTERESTED", "LOST", "CLOSED"
+  rating        Float?
+  reviews       Int?
+  socials       String?  // JSON string for social links
+  distance      Float?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model HelpRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  subject   String
+  message   String   @db.Text
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  percent   Int      // Discount (0-100)
+  maxUses   Int      // Total usage limit
+  usedCount Int      @default(0)
+  expiry    DateTime? // Optional expiry date
+  active    Boolean  @default(true)
+  validPlan String?  @default("ALL") // "ALL", "Pro Scanner", "Agency"
+  createdAt DateTime @default(now())
+}
+
+model TrialTracker {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  usedAt    DateTime @default(now())
+}
