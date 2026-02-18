@@ -3,7 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function AdminDashboard({ users, helpRequests, leads = [], coupons = [] }) {
+interface AdminDashboardProps {
+    users: any[];
+    helpRequests: any[];
+    leads?: any[];
+    coupons?: any[];
+}
+
+export default function AdminDashboard({
+    users,
+    helpRequests,
+    leads = [],
+    coupons = []
+}: AdminDashboardProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<'USERS' | 'LEADS' | 'HELP' | 'COUPONS' | 'SETTINGS'>('USERS');
@@ -14,7 +26,7 @@ export default function AdminDashboard({ users, helpRequests, leads = [], coupon
     // Password Form State
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
-    const handleAction = async (userId, action, amount = 0) => {
+    const handleAction = async (userId: string, action: string, amount: number = 0) => {
         setLoading(true);
         try {
             const res = await fetch('/api/admin/actions', {
