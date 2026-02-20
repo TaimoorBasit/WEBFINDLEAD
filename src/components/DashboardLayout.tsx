@@ -56,7 +56,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
 
     useEffect(() => {
         document.documentElement.classList.remove("dark");
@@ -115,7 +115,7 @@ export default function RootLayout({
                     </nav>
 
                     <div className="p-6">
-                        {session?.user && (session.user as any).role === 'ADMIN' && (
+                        {status === 'authenticated' && session?.user?.role === 'ADMIN' && (
                             <a
                                 href="/webfind-extension.zip"
                                 download="webfind-extension.zip"
