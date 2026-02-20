@@ -191,6 +191,22 @@ export default function RootLayout({
                 <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-muted/30">
                     <div className="max-w-7xl mx-auto">
                         {children}
+                        <footer className="mt-20 pb-10 border-t border-border/50 pt-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <p className="text-muted-foreground text-sm font-medium">
+                                © {new Date().getFullYear()} WebFindLead. All rights reserved.
+                            </p>
+                            <p className="text-muted-foreground text-sm font-medium">
+                                Developed with passion by{" "}
+                                <a
+                                    href="https://taimoorawan.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:text-primary/80 transition-colors font-bold"
+                                >
+                                    Taimoor Awan
+                                </a>
+                            </p>
+                        </footer>
                     </div>
                 </div>
             </main>
