@@ -115,7 +115,7 @@ export default function RootLayout({
                     </nav>
 
                     <div className="p-6">
-                        {session?.user?.role === 'ADMIN' && (
+                        {session?.user && (session.user as any).role === 'ADMIN' && (
                             <a
                                 href="/webfind-extension.zip"
                                 download="webfind-extension.zip"
