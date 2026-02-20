@@ -115,6 +115,17 @@ export default function RootLayout({
                     </nav>
 
                     <div className="p-6">
+                        {session?.user?.role === 'ADMIN' && (
+                            <a
+                                href="/webfind-extension.zip"
+                                download="webfind-extension.zip"
+                                className="flex items-center justify-center gap-3 px-4 py-3 mb-6 bg-gray-900 text-white rounded-xl shadow-lg hover:bg-black transition-all hover:scale-[1.02] active:scale-[0.98] font-bold text-xs uppercase tracking-widest w-full group"
+                            >
+                                <Download className="w-4 h-4 group-hover:animate-bounce" />
+                                <span>Get Extension</span>
+                            </a>
+                        )}
+
                         <div className="bg-muted/30 border border-border/50 rounded-3xl p-5 mb-6">
                             {session ? (
                                 <>
