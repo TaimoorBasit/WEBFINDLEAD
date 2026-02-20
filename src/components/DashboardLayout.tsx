@@ -58,7 +58,9 @@ export default function RootLayout({
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { data: session, status } = useSession();
 
+    const [mounted, setMounted] = useState(false);
     useEffect(() => {
+        setMounted(true);
         document.documentElement.classList.remove("dark");
         localStorage.setItem("theme", "light");
     }, []);
@@ -71,7 +73,7 @@ export default function RootLayout({
         { icon: Settings, label: "Settings", href: "/settings" },
     ];
 
-    if (session?.user?.role === 'ADMIN') {
+    if (mounted && status === 'authenticated' && session?.user?.role === 'ADMIN') {
         navItems.push({ icon: Shield, label: "Admin Panel", href: "/admin" });
     }
 
@@ -115,7 +117,7 @@ export default function RootLayout({
                     </nav>
 
                     <div className="p-6">
-                        {status === 'authenticated' && session?.user?.role === 'ADMIN' && (
+                        {mounted && status === 'authenticated' && session?.user?.role === 'ADMIN' && (
                             <a
                                 href="/webfind-extension.zip"
                                 download="webfind-extension.zip"
