@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Download, Shield, Settings, Users, Database, HelpCircle, Ticket } from 'lucide-react';
 
 interface AdminDashboardProps {
     users: any[];
@@ -18,7 +19,7 @@ export default function AdminDashboard({
 }: AdminDashboardProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'USERS' | 'LEADS' | 'HELP' | 'COUPONS' | 'SETTINGS'>('USERS');
+    const [activeTab, setActiveTab] = useState<'USERS' | 'LEADS' | 'HELP' | 'COUPONS' | 'SETTINGS' | 'EXTENSION'>('USERS');
 
     // Coupon Form State
     const [newCoupon, setNewCoupon] = useState({ code: '', percent: '', maxUses: '', validPlan: 'ALL' });
@@ -146,6 +147,12 @@ export default function AdminDashboard({
                     className={`px-4 py-2 font-bold text-sm uppercase tracking-wide rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'HELP' ? 'bg-white border text-primary border-b-white -mb-2.5 z-10' : 'text-gray-500 hover:text-gray-900'}`}
                 >
                     Help Requests ({helpRequests.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('EXTENSION')}
+                    className={`px-4 py-2 font-bold text-sm uppercase tracking-wide rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'EXTENSION' ? 'bg-white border text-primary border-b-white -mb-2.5 z-10' : 'text-gray-500 hover:text-gray-900'}`}
+                >
+                    Browser Extension
                 </button>
                 <button
                     onClick={() => setActiveTab('SETTINGS')}
@@ -451,6 +458,37 @@ export default function AdminDashboard({
                                     Update Password
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                )}
+                {activeTab === 'EXTENSION' && (
+                    <div className="max-w-2xl mx-auto py-12 text-center">
+                        <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                            <Download className="w-10 h-10 text-primary" />
+                        </div>
+                        <h2 className="text-3xl font-black mb-4 text-gray-800 tracking-tight">WebFind Browser Extension</h2>
+                        <p className="text-gray-600 mb-10 max-w-md mx-auto leading-relaxed">
+                            This extension allows you to scan for leads directly from your browser. Keep it secure and do not share the ZIP file with non-admin users.
+                        </p>
+
+                        <a
+                            href="/webfind-extension.zip"
+                            download="webfind-extension.zip"
+                            className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl shadow-xl hover:bg-black transition-all hover:scale-[1.02] active:scale-[0.98] font-bold text-sm uppercase tracking-[0.2em] group"
+                        >
+                            <Download className="w-5 h-5 group-hover:animate-bounce" />
+                            Download Extension Bundle (.ZIP)
+                        </a>
+
+                        <div className="mt-12 p-6 bg-amber-50 rounded-2xl border border-amber-100 text-left">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800 mb-3 flex items-center gap-2">
+                                <Shield className="w-4 h-4" /> Usage Policy
+                            </h3>
+                            <ul className="text-sm text-amber-700 space-y-2 font-medium">
+                                <li>• Only authorized admin accounts should access this extension.</li>
+                                <li>• The extension contains proprietary scanning logic.</li>
+                                <li>• Report any unauthorized access to the system administrator.</li>
+                            </ul>
                         </div>
                     </div>
                 )}
