@@ -19,6 +19,7 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Chatbot from "./Chatbot";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -214,6 +215,7 @@ export default function RootLayout({
                     </div>
                 </div>
             </main>
+            <Chatbot />
         </div >
     );
 }
