@@ -24,10 +24,11 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import Link from "next/link";
 
 export default function AuditPage() {
     const { id } = useParams();
-    const [lead, setLead] = useState<any>(null);
+    const [lead, setLead] = useState<Record<string, any> | null>(null);
     const [loading, setLoading] = useState(true);
     const [isExporting, setIsExporting] = useState(false);
 
@@ -51,7 +52,8 @@ export default function AuditPage() {
             });
 
             pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`Audit-Report-${lead.name.replace(/\s+/g, '-')}.pdf`);
+            const fileName = lead ? `Audit-Report-${lead.name.replace(/\s+/g, '-')}.pdf` : 'Audit-Report.pdf';
+            pdf.save(fileName);
         } catch (error) {
             console.error("PDF Export failed:", error);
             alert("Failed to generate PDF. Please try again.");
@@ -91,7 +93,7 @@ export default function AuditPage() {
                 </div>
                 <h1 className="text-2xl font-black text-slate-900 mb-2">Report Not Found</h1>
                 <p className="text-slate-500 font-medium mb-8">This audit link may have expired or is invalid.</p>
-                <a href="/" className="inline-block bg-primary text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all">Back to Safety</a>
+                <Link href="/" className="inline-block bg-primary text-white font-bold px-8 py-3 rounded-xl hover:shadow-lg transition-all">Back to Safety</Link>
             </div>
         </div>
     );

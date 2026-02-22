@@ -16,7 +16,7 @@ export async function GET() {
             orderBy: { createdAt: 'desc' },
         });
 
-        const leads = (rawLeads as any[]).map(lead => ({
+        const leads = (rawLeads as Record<string, any>[]).map(lead => ({
             ...lead,
             socials: lead.socials ? JSON.parse(lead.socials) : {},
             pixels: lead.pixels ? JSON.parse(lead.pixels) : { facebook: false, google: false, tiktok: false },
