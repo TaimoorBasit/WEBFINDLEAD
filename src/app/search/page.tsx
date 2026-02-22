@@ -46,6 +46,7 @@ export default function SearchPage() {
     const [savedMap, setSavedMap] = useState<Record<string, string>>({});
     const [filter, setFilter] = useState<"ALL" | "NO_WEBSITE" | "NO_SOCIALS" | "LOW_QUALITY">("ALL");
     const [showPricing, setShowPricing] = useState(false);
+    const [isDeep, setIsDeep] = useState(false);
     const { data: session, update } = useSession();
     const [balance, setBalance] = useState<number>(0);
 
@@ -63,8 +64,9 @@ export default function SearchPage() {
             const leads = response.data;
             const map: Record<string, string> = {};
             leads.forEach((l: Business) => {
-                if (l.placeId) {
-                    map[l.placeId] = l.id;
+                const lid = l.placeId || l.id;
+                if (lid) {
+                    map[lid] = l.id;
                 } else if (l.mapsUrl) {
                     const normalized = normalizeMapsUrl(l.mapsUrl);
                     if (normalized) map[normalized] = l.id;
@@ -109,14 +111,19 @@ export default function SearchPage() {
 
         try {
             const startParam = isLoadMore && nextStart ? `&start=${nextStart}` : '';
-            const response = await axios.get(`/api/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}${startParam}`);
+            const deepParam = isDeep ? '&all=true' : '';
+            const searchUrl = `/api/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}${startParam}${deepParam}`;
+            console.log('Searching at:', searchUrl, {
+                isDeep,
+                isLoadMore,
+                nextStart,
+                sessionStatus: !!session,
+                userId: session?.user?.id
+            });
+            const response = await axios.get(searchUrl);
 
             const newResults = response.data.results as Business[];
             setNextStart(response.data.nextStart);
-
-            if (newResults.length === 0 && !isLoadMore) {
-                // Optional: distinct empty state handling
-            }
 
             // Update balance from server response (decremented on search)
             if (typeof response.data.remainingBalance === 'number') {
@@ -148,15 +155,22 @@ export default function SearchPage() {
             });
         } catch (error: any) {
             console.error("Search failed:", error);
+
+            if (error.response?.status === 401) {
+                // Session likely expired or user record missing
+                console.warn("Session invalid (401). Redirecting to signin.");
+                router.push("/auth/signin");
+                return;
+            }
+
             if (error.response?.status === 403) {
                 setShowPricing(true);
                 setBalance(0);
-                // Don't show generic error for trial expiry
                 return;
             }
 
             setError("Failed to fetch results. Please try again.");
-            if (!isLoadMore) setResults([]); // Ensure empty results on failure
+            if (!isLoadMore) setResults([]);
         } finally {
             setLoading(false);
         }
@@ -173,18 +187,20 @@ export default function SearchPage() {
                         ...biz,
                         websiteStatus: analysis.status,
                         email: analysis.emails && analysis.emails.length > 0 ? analysis.emails[0] : null,
-                        socials: { ...biz.socials, ...analysis.socials }
+                        socials: { ...biz.socials, ...analysis.socials },
+                        pixels: analysis.pixels,
+                        ads: analysis.ads,
+                        hosting: analysis.hosting,
+                        emailProvider: analysis.emailProvider
                     };
                 }
                 return biz;
             }));
         } catch (error) {
             console.error("Analysis failed:", error);
-            // On failure, maybe downgrade to 'LOW_QUALITY' or keep as is? 
-            // Better to stop spinner.
             setResults(prev => prev.map(biz => {
                 if (biz.id === id) {
-                    return { ...biz, websiteStatus: 'LOW_QUALITY' }; // fallback
+                    return { ...biz, websiteStatus: 'LOW_QUALITY' };
                 }
                 return biz;
             }));
@@ -313,12 +329,25 @@ export default function SearchPage() {
                         </div>
 
                         <div className="flex items-center gap-3 w-full lg:w-auto">
+                            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-xl border border-slate-200">
+                                <input
+                                    type="checkbox"
+                                    id="deepSearch"
+                                    checked={isDeep}
+                                    onChange={(e) => setIsDeep(e.target.checked)}
+                                    className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                                />
+                                <label htmlFor="deepSearch" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer select-none">
+                                    Deep Search
+                                </label>
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="flex-1 lg:flex-none bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold text-sm tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50 min-w-[120px]"
                             >
-                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Find Lead"}
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Find Leads"}
                             </button>
 
                             {results.length > 0 && (

@@ -11,10 +11,18 @@ export async function GET() {
     }
 
     try {
-        const leads = await prisma.lead.findMany({
+        const rawLeads = await prisma.lead.findMany({
             where: { userId: session.user.id },
             orderBy: { createdAt: 'desc' },
         });
+
+        const leads = (rawLeads as any[]).map(lead => ({
+            ...lead,
+            socials: lead.socials ? JSON.parse(lead.socials) : {},
+            pixels: lead.pixels ? JSON.parse(lead.pixels) : { facebook: false, google: false, tiktok: false },
+            ads: lead.ads ? JSON.parse(lead.ads) : { facebook: false, google: false },
+        }));
+
         return NextResponse.json(leads);
     } catch (error) {
         console.error("API GET Error:", error);
@@ -78,6 +86,10 @@ export async function POST(req: NextRequest) {
                 rating: rating,
                 reviews: reviews,
                 socials: body.socials ? JSON.stringify(body.socials) : null,
+                pixels: body.pixels ? JSON.stringify(body.pixels) : null,
+                ads: body.ads ? JSON.stringify(body.ads) : null,
+                hosting: body.hosting,
+                emailProvider: body.emailProvider,
                 notes: body.notes,
             },
         });

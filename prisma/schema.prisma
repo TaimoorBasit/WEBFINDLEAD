@@ -91,7 +91,11 @@ model Lead {
   status        String   @default("NEW") // "NEW", "CONTACTED", "INTERESTED", "LOST", "CLOSED"
   rating        Float?
   reviews       Int?
-  socials       String?  // JSON string for social links
+  socials       String?  @db.Text // JSON string for social links
+  pixels        String?  @db.Text // JSON string: { facebook: boolean, google: boolean }
+  ads           String?  @db.Text // JSON string: { facebook: boolean, google: boolean }
+  emailProvider String?
+  hosting       String?
   distance      Float?
   notes         String?
   createdAt     DateTime @default(now())

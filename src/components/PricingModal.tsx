@@ -25,7 +25,7 @@ export default function PricingModal({ isOpen, onClose, initialPlan }: PricingMo
             name: "Pro Scanner",
             price: "$20",
             period: "/month",
-            features: ["75 Leads / month", "Instant Contact Details", "Export to CSV", "Commercial Rights"],
+            features: ["75 leads per search", "Public Audit Reports", "PDF Audit Downloads", "AI Personal Pitching"],
             isPopular: true,
             buttonText: "Get Pro Scanner",
             color: "primary"
@@ -34,7 +34,7 @@ export default function PricingModal({ isOpen, onClose, initialPlan }: PricingMo
             name: "Agency",
             price: "$99",
             period: "/month",
-            features: ["Unlimited Leads", "Priority Support", "Advanced Filters", "API Access"],
+            features: ["Unlimited leads per month", "Bulk PDF Export", "One-Tap Email Outreach", "API Access"],
             isPopular: false,
             buttonText: "Get Agency",
             color: "blue"
@@ -198,67 +198,90 @@ export default function PricingModal({ isOpen, onClose, initialPlan }: PricingMo
 
                         <div className="space-y-4 mb-6">
                             <div>
-                                <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5 ml-1">Coupon Code</label>
+                                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Coupon Code</label>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
                                         value={couponCode}
                                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                         placeholder="Enter code"
-                                        className="flex-1 bg-white border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl px-4 py-2.5 outline-none font-medium text-slate-900 uppercase"
+                                        className="flex-1 bg-white border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-2xl px-5 py-3 outline-none font-medium text-slate-900 uppercase transition-all"
                                     />
                                     <button
                                         onClick={handleApplyCoupon}
-                                        className="bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"
+                                        className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-colors"
                                     >
                                         Apply
                                     </button>
                                 </div>
-                                {couponError && <p className="text-xs text-red-500 font-bold mt-1 ml-1">{couponError}</p>}
-                                {discount > 0 && <p className="text-xs text-emerald-600 font-bold mt-1 ml-1">Coupon applied successfully!</p>}
+                                {couponError && <p className="text-xs text-red-500 font-bold mt-1.5 ml-1">{couponError}</p>}
+                                {discount > 0 && <p className="text-xs text-emerald-600 font-bold mt-1.5 ml-1">Coupon applied successfully!</p>}
                             </div>
+                        </div>
 
-                            {finalPrice > 0 && (
+                        {finalPrice > 0 ? (
+                            <div className="space-y-4 mb-8 animate-in fade-in slide-in-from-top-2 duration-500">
                                 <div>
-                                    <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5 ml-1">Card Details</label>
-                                    <div className="relative">
-                                        <CreditCard className="absolute left-4 top-3 text-slate-400 w-5 h-5" />
-                                        <input
-                                            type="text"
-                                            placeholder="Card number"
-                                            className="w-full bg-white border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl pl-12 pr-4 py-3 outline-none font-medium text-slate-900"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-3">
-                                        <input
-                                            type="text"
-                                            placeholder="MM / YY"
-                                            className="bg-white border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl px-4 py-3 outline-none font-medium text-slate-900"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="CVC"
-                                            className="bg-white border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl px-4 py-3 outline-none font-medium text-slate-900"
-                                        />
+                                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Card Information</label>
+                                    <div className="space-y-3">
+                                        <div className="relative group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                                                <CreditCard className="w-5 h-5" />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Card number"
+                                                className="w-full bg-white border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-2xl pl-12 pr-4 py-4 outline-none font-medium text-slate-900 transition-all"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <input
+                                                type="text"
+                                                placeholder="MM / YY"
+                                                className="bg-white border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-2xl px-5 py-4 outline-none font-medium text-slate-900 transition-all"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="CVC"
+                                                className="bg-white border border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/5 rounded-2xl px-5 py-4 outline-none font-medium text-slate-900 transition-all"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+
+                                <div className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
+                                        <Check className="w-4 h-4 text-emerald-500" />
+                                    </div>
+                                    <span className="text-[11px] font-bold text-slate-600">Secure 256-bit SSL Encrypted Payment</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-[2rem] p-8 mb-8 text-center animate-in zoom-in-95 duration-500">
+                                <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Check className="w-8 h-8 text-emerald-600" />
+                                </div>
+                                <h4 className="text-xl font-black text-slate-900 mb-2">100% Discount Applied!</h4>
+                                <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                                    Your coupon code covers the full cost of the <strong>{selectedPlan?.name}</strong> plan. No payment information is required.
+                                </p>
+                            </div>
+                        )}
 
                         <button
                             onClick={handleActivate}
                             disabled={loading}
-                            className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            className={`w-full ${finalPrice === 0 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200' : 'bg-slate-900 hover:bg-slate-800 shadow-slate-200'} text-white font-bold py-4 rounded-xl hover:shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-2`}
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                 <>
-                                    {finalPrice === 0 ? "Activate Subscription" : `Pay $${finalPrice.toFixed(2)}`}
+                                    {finalPrice === 0 ? `Activate ${selectedPlan?.name} Now` : `Complete Payment ($${finalPrice.toFixed(0)})`}
                                     <ArrowRight className="w-5 h-5" />
                                 </>
                             )}
                         </button>
-                        <p className="text-center text-[10px] text-slate-400 mt-4 font-medium">
-                            Secure payment processing via Stripe.
+                        <p className="text-center text-[10px] text-slate-400 mt-5 font-medium uppercase tracking-widest">
+                            {finalPrice === 0 ? "Instant Trial Access" : "Guaranteed Safe Checkout"}
                         </p>
                     </div>
                 )}

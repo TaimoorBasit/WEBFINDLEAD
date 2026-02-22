@@ -217,22 +217,69 @@ function DashboardContent() {
         ))}
       </div>
 
-      {/* Scanned Platforms - Realistic Logos for Trust */}
-      <div className="bg-muted/30 border border-border rounded-[2.5rem] p-8 lg:p-12 mt-12 mb-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <h3 className="text-xl font-black tracking-tighter mb-2 italic">Scanning Infrastructure</h3>
-            <p className="text-muted-foreground text-sm font-medium">Real-time data extraction from the world's leading platforms.</p>
+      {/* Premium Intelligence Command Center */}
+      <section className="relative py-24 px-4 overflow-hidden">
+        {/* Ambient background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-primary/5 rounded-full blur-[120px] -z-10" />
+
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-16">
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600">Real-time Intelligence Network</span>
+            </div>
+            <h2 className="text-4xl lg:text-5xl font-black tracking-tighter text-slate-900">Powered by Global Data Engines</h2>
+            <p className="text-slate-500 font-medium max-w-2xl text-lg">
+              Our autonomous scanners extract, verify, and cross-reference data from the world's most trusted platforms in sub-seconds.
+            </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-10 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Google_Maps_icon_%282020%29.svg" alt="Google Maps" className="h-8 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/ad/Yelp_Logo.svg" alt="Yelp" className="h-6 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook" className="h-8 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="LinkedIn" className="h-8 object-contain" />
-            <img src="https://img.icons8.com/color/48/yellow-pages.png" alt="Yellow Pages" className="h-8 object-contain" />
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 w-full">
+            {[
+              { name: "Website Intel", icon: "https://www.gstatic.com/images/branding/product/2x/browser_96dp.png", label: "Tech Stack Audit", sub: "Deep Scan" },
+              { name: "Google Maps", icon: "https://www.gstatic.com/images/branding/product/2x/maps_96dp.png", label: "Business Data", sub: "Live API" },
+              { name: "Meta Ads", icon: "https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg", label: "Ad Intelligence", sub: "Proprietary" },
+              { name: "Gmail API", icon: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg", label: "Email Verification", sub: "Verified" },
+              { name: "LinkedIn", icon: "https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png", label: "Professional Intel", sub: "Validated" },
+              { name: "Instagram", icon: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg", label: "Brand Presence", sub: "Social Scan" }
+            ].map((engine) => (
+              <div
+                key={engine.name}
+                className="group relative bg-white/40 backdrop-blur-xl border border-slate-200/50 p-6 rounded-[2.5rem] flex flex-col items-center text-center gap-4 transition-all duration-700 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 overflow-hidden"
+              >
+                {/* Advanced Light Sweep Animation */}
+                <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-primary/5 to-transparent -skew-x-12 group-hover:animate-[sweep_1.5s_ease-in-out_infinite]" />
+
+                <div className="relative w-16 h-16 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-slate-100/50 rounded-2xl rotate-6 group-hover:rotate-12 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center p-3 group-hover:scale-110 group-hover:rotate-0 transition-all duration-500">
+                    <img src={engine.icon} alt={engine.name} className="w-full h-full object-contain" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-black text-slate-900">{engine.name}</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{engine.label}</span>
+                </div>
+
+                <div className="mt-auto pt-2">
+                  <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[8px] font-black uppercase tracking-tighter rounded-md border border-slate-200 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-colors">
+                    {engine.sub}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      <style jsx>{`
+        @keyframes sweep {
+          0% { left: -100%; opacity: 0; }
+          50% { opacity: 1; }
+          100% { left: 100%; opacity: 0; }
+        }
+      `}</style>
 
 
       <div className="text-center mb-4">
@@ -277,12 +324,12 @@ function DashboardContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
+                "75 leads per search for month",
                 "Unlimited Website Audits",
                 "Advanced SEO Analysis",
                 "Custom Pitch Templates",
                 "Export to CRM (CSV/PDF)",
-                "Bulk Scanning",
-                "Dedicated API Access"
+                "Bulk Scanning"
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3 group/item">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all">
@@ -310,7 +357,11 @@ function DashboardContent() {
               <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
             </div>
             <h3 className="text-3xl font-black tracking-tight text-white mb-2 leading-tight">Agency <br />Force</h3>
-            <p className="text-white/50 text-sm font-medium mb-8">Scale your outreach with unlimited seats.</p>
+            <div className="flex items-baseline mb-4">
+              <span className="text-4xl font-black text-white">$99</span>
+              <span className="text-white/40 text-sm font-medium ml-1">/mo</span>
+            </div>
+            <p className="text-white/50 text-sm font-medium mb-8">Unlimited leads per month.</p>
 
             <div className="space-y-4">
               <div className="flex items-center gap-3">

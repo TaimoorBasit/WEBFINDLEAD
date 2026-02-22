@@ -65,9 +65,7 @@ const MOCK_RESULTS: SerpApiBusiness[] = [
 export async function searchBusinesses(query: string, location: string, start: number = 0) {
     if (!SERPAPI_KEY || SERPAPI_KEY.includes('YOUR_SERPAPI_KEY_HERE')) {
         console.warn('SerpAPI key is missing or invalid. Using MOCK data.');
-        // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1500));
-        // Simple mock pagination
         if (start > 0) return { results: [], nextStart: undefined };
         return { results: MOCK_RESULTS, nextStart: undefined };
     }
@@ -81,32 +79,54 @@ export async function searchBusinesses(query: string, location: string, start: n
                 q: finalQuery,
                 type: 'search',
                 api_key: SERPAPI_KEY,
-                start: start, // Pagination offset
+                start: start,
             },
         });
 
-        if (!response.data.local_results) {
-            console.warn('SerpAPI returned no local_results. Response:', response.data);
-            if (response.data.error) throw new Error(response.data.error);
+        if (!response.data.local_results && !response.data.error) {
+            return { results: [], nextStart: undefined };
         }
 
+        if (response.data.error) throw new Error(response.data.error);
+
         const results = response.data.local_results || [];
-
-        // serpapi local_results usually returns 20 items. 
-        // If we got results, assume there might be a next page.
-        // Google Maps pagination via SerpAPI typically increments by 20.
-        const nextStart = results.length > 0 ? start + 20 : undefined;
-
-        // Check if serpapi response has 'serpapi_pagination' to be sure
         const hasNextPage = response.data.serpapi_pagination?.next;
+        const nextStart = hasNextPage ? start + 20 : undefined;
 
         return {
             results,
-            nextStart: hasNextPage ? nextStart : undefined
+            nextStart
         };
 
     } catch (error) {
         console.error('Error fetching from SerpAPI, falling back to MOCK data:', error);
         return { results: MOCK_RESULTS, nextStart: undefined };
     }
+}
+
+/**
+ * Fetches multiple pages of results recursively or in a loop.
+ * @param maxResults Desired total results (will be rounded up to nearest 20)
+ */
+export async function searchManyBusinesses(query: string, location: string, maxResults: number = 20) {
+    let allResults: any[] = [];
+    let currentStart = 0;
+    let nextStart: number | undefined = 0;
+
+    while (allResults.length < maxResults && nextStart !== undefined) {
+        const { results, nextStart: ns } = await searchBusinesses(query, location, currentStart);
+        if (results.length === 0) break;
+
+        allResults = [...allResults, ...results];
+        nextStart = ns;
+        currentStart = ns || 0;
+
+        // Safety break to prevent infinite loops or excessive credits usage
+        if (allResults.length >= 100) break;
+    }
+
+    return {
+        results: allResults,
+        nextStart
+    };
 }
