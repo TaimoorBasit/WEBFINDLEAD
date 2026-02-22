@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MessageCircle, X, Send, Bot, Minus, ChevronRight } from "lucide-react";
+import { X, Send, Minus, ChevronRight } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -561,15 +561,39 @@ export default function Chatbot() {
             {isOpen && (
                 <div className="mb-4 w-[380px] h-[560px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
                     {/* Header */}
-                    <div className="bg-slate-900 px-5 py-4 flex items-center justify-between text-white shrink-0">
+                    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-5 py-4 flex items-center justify-between text-white shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary/20 rounded-2xl flex items-center justify-center border border-white/10">
-                                <Bot className="w-5 h-5 text-primary" />
+                            {/* AI Robot Avatar */}
+                            <div className="relative w-11 h-11 shrink-0">
+                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 opacity-30 blur-md" />
+                                <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
+                                        {/* Antenna */}
+                                        <line x1="16" y1="2" x2="16" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                        <circle cx="16" cy="2" r="1.5" fill="white" />
+                                        {/* Head */}
+                                        <rect x="6" y="7" width="20" height="14" rx="4" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.2" />
+                                        {/* Eyes */}
+                                        <circle cx="11.5" cy="13" r="2.5" fill="white" />
+                                        <circle cx="20.5" cy="13" r="2.5" fill="white" />
+                                        <circle cx="12" cy="12.5" r="1" fill="#6366f1" />
+                                        <circle cx="21" cy="12.5" r="1" fill="#6366f1" />
+                                        {/* Mouth */}
+                                        <path d="M11 17.5 Q16 20 21 17.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+                                        {/* Ears */}
+                                        <rect x="3" y="11" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.4" />
+                                        <rect x="26" y="11" width="3" height="5" rx="1.5" fill="white" fillOpacity="0.4" />
+                                        {/* Body */}
+                                        <rect x="9" y="22" width="14" height="7" rx="3" fill="white" fillOpacity="0.12" stroke="white" strokeWidth="1" />
+                                        <rect x="13" y="24.5" width="2" height="2.5" rx="1" fill="white" fillOpacity="0.6" />
+                                        <rect x="17" y="24.5" width="2" height="2.5" rx="1" fill="white" fillOpacity="0.6" />
+                                    </svg>
+                                </div>
                             </div>
                             <div>
                                 <h3 className="text-sm font-black tracking-tight">WebFind Assistant</h3>
                                 <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Always Online · 7 Languages</span>
                                 </div>
                             </div>
@@ -643,26 +667,53 @@ export default function Chatbot() {
                 </div>
             )}
 
-            {/* Floating Button */}
+            {/* Floating AI Robot Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={cn(
-                    "w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 relative overflow-hidden group",
-                    isOpen ? "bg-slate-800" : "bg-primary"
-                )}
+                className="relative w-16 h-16 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group"
+                aria-label="Open WebFind Assistant"
             >
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                {isOpen ? (
-                    <X className="w-7 h-7 text-white" />
-                ) : (
-                    <>
-                        <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white/90" />
-                        </span>
-                        <MessageCircle className="w-7 h-7 text-white" />
-                    </>
+                {/* Outer glow ring */}
+                {!isOpen && (
+                    <span className="absolute inset-0 rounded-[1.5rem] bg-gradient-to-br from-indigo-500 to-purple-600 opacity-40 blur-lg animate-pulse" />
                 )}
+                {/* Button body */}
+                <div className={cn(
+                    "relative w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-2xl overflow-hidden transition-all duration-300",
+                    isOpen
+                        ? "bg-slate-800"
+                        : "bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600"
+                )}>
+                    {/* Shine */}
+                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-white/10 rounded-t-[1.5rem]" />
+                    {isOpen ? (
+                        <X className="w-7 h-7 text-white" />
+                    ) : (
+                        <>
+                            {/* Notification dot */}
+                            <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
+                            </span>
+                            {/* AI Robot SVG */}
+                            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-9 h-9 drop-shadow-lg">
+                                <line x1="16" y1="1" x2="16" y2="6" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+                                <circle cx="16" cy="1" r="1.5" fill="white" />
+                                <rect x="5" y="6" width="22" height="15" rx="5" fill="white" fillOpacity="0.2" stroke="white" strokeWidth="1.3" />
+                                <circle cx="11" cy="13" r="3" fill="white" />
+                                <circle cx="21" cy="13" r="3" fill="white" />
+                                <circle cx="11.8" cy="12.2" r="1.2" fill="#7c3aed" />
+                                <circle cx="21.8" cy="12.2" r="1.2" fill="#7c3aed" />
+                                <path d="M10 18.5 Q16 22 22 18.5" stroke="white" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+                                <rect x="2" y="10" width="3" height="6" rx="1.5" fill="white" fillOpacity="0.5" />
+                                <rect x="27" y="10" width="3" height="6" rx="1.5" fill="white" fillOpacity="0.5" />
+                                <rect x="9" y="22" width="14" height="8" rx="3.5" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1" />
+                                <circle cx="14" cy="26" r="1.2" fill="white" fillOpacity="0.7" />
+                                <circle cx="18" cy="26" r="1.2" fill="white" fillOpacity="0.7" />
+                            </svg>
+                        </>
+                    )}
+                </div>
             </button>
         </div>
     );
