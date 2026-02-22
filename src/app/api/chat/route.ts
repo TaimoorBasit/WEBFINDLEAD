@@ -49,13 +49,18 @@ export async function POST(req: NextRequest) {
             systemInstruction: SYSTEM_PROMPT,
         });
 
-        // Build Gemini chat history (all messages except the last user message)
-        const history = messages.slice(0, -1).map((msg: { role: string; content: string }) => ({
+        // Build Gemini chat history from previous messages (excluding the last user message)
+        // Gemini requires history to start with a 'user' role, so we strip leading model messages
+        const allPrevious = messages.slice(0, -1).map((msg: { role: string; content: string }) => ({
             role: msg.role === "assistant" ? "model" : "user",
             parts: [{ text: msg.content }],
         }));
 
-        // Start a chat session with history
+        // Drop leading 'model' messages — Gemini only accepts history starting with 'user'
+        const firstUserIdx = allPrevious.findIndex((m: { role: string }) => m.role === "user");
+        const history = firstUserIdx >= 0 ? allPrevious.slice(firstUserIdx) : [];
+
+        // Start a chat session with valid history
         const chat = model.startChat({ history });
 
         // Last message from user
