@@ -215,7 +215,10 @@ export default function RootLayout({
                     </div>
                 </div>
             </main>
-            <Chatbot />
+            {/* Chatbot — Admin only until fully tested */}
+            {mounted && status === 'authenticated' && session?.user?.role === 'ADMIN' && (
+                <Chatbot />
+            )}
         </div >
     );
 }
