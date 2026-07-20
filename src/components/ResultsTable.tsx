@@ -425,20 +425,9 @@ export default function ResultsTable({
                                                                     </div>
                                                                     <div className="flex flex-col gap-1">
                                                                         <span className="text-[9px] font-black uppercase text-slate-400">Tax Registration</span>
-                                                                        {onUpdateTaxStatus ? (
-                                                                            <select
-                                                                                value={biz.taxStatus || 'UNKNOWN'}
-                                                                                onChange={(e) => onUpdateTaxStatus(biz.id, e.target.value)}
-                                                                                onClick={(e) => e.stopPropagation()}
-                                                                                className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-2 py-1 outline-none"
-                                                                            >
-                                                                                <option value="UNKNOWN">Unknown</option>
-                                                                                <option value="REGISTERED">Registered</option>
-                                                                                <option value="UNREGISTERED">Not Registered</option>
-                                                                            </select>
-                                                                        ) : (
-                                                                            <span className="text-xs font-bold text-slate-700">{biz.taxStatus || 'UNKNOWN'}</span>
-                                                                        )}
+                                                                        <span className={`text-xs font-bold ${biz.taxStatus === 'REGISTERED' ? 'text-emerald-600' : biz.taxStatus === 'UNREGISTERED' ? 'text-red-600' : 'text-slate-700'}`}>
+                                                                            {biz.taxStatus === 'REGISTERED' ? 'REGISTERED' : biz.taxStatus === 'UNREGISTERED' ? 'NOT REGISTERED' : (biz.taxStatus || 'UNKNOWN')}
+                                                                        </span>
                                                                     </div>
                                                                 </div>
                                                             </div>
