@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function main() {
     const email = 'admin@webfind.com';
-    const password = await bcrypt.hash('admin123', 10);
+    const password = await bcrypt.hash('Admin123', 10);
 
     try {
         const user = await prisma.user.findUnique({ where: { email } });
@@ -24,7 +24,7 @@ async function main() {
                 data: { password }
             });
         }
-        console.log(`Password for ${email} is now 'admin123'.`);
+        console.log(`Password for ${email} is now 'Admin123'.`);
     } catch (error) {
         console.error("Error:", error);
     }

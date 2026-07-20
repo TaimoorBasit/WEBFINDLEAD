@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
                         category: lead.category,
                         website: lead.website || null,
                         websiteStatus: lead.status,
+                        taxStatus: lead.taxStatus || "UNKNOWN",
                         mapsUrl: lead.mapsLink,
                         rating: parseFloat(lead.rating) || 0,
                         reviews: parseInt(lead.reviews) || 0,

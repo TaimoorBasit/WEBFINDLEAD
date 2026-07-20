@@ -53,6 +53,7 @@ export interface Business {
     hours?: string;
     description?: string;
     websiteStatus: WebsiteStatus;
+    taxStatus?: string;
     status: string; // NEW, CONTACTED, INTERESTED, LOST, CLOSED
     socials?: { facebook?: string; instagram?: string; twitter?: string; linkedin?: string; tiktok?: string; youtube?: string };
     pixels?: { facebook: boolean; google: boolean; tiktok: boolean };
@@ -66,6 +67,7 @@ interface ResultsTableProps {
     onSave?: (biz: Business) => void;
     onRemove?: (bizId: string) => void;
     onUpdateStatus?: (bizId: string, status: string) => void;
+    onUpdateTaxStatus?: (bizId: string, taxStatus: string) => void;
     isLoading?: boolean;
     emptyMessage?: string;
     savedIds?: string[];
@@ -77,6 +79,7 @@ export default function ResultsTable({
     onSave,
     onRemove,
     onUpdateStatus,
+    onUpdateTaxStatus,
     isLoading,
     emptyMessage = "No results found. Try a different search.",
     savedIds = []
@@ -419,6 +422,23 @@ export default function ResultsTable({
                                                                     <div className="flex flex-col gap-1">
                                                                         <span className="text-[9px] font-black uppercase text-slate-400">Email Stack</span>
                                                                         <span className="text-xs font-bold text-slate-700">{biz.emailProvider || "Detecting..."}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <span className="text-[9px] font-black uppercase text-slate-400">Tax Registration</span>
+                                                                        {onUpdateTaxStatus ? (
+                                                                            <select
+                                                                                value={biz.taxStatus || 'UNKNOWN'}
+                                                                                onChange={(e) => onUpdateTaxStatus(biz.id, e.target.value)}
+                                                                                onClick={(e) => e.stopPropagation()}
+                                                                                className="text-xs font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded px-2 py-1 outline-none"
+                                                                            >
+                                                                                <option value="UNKNOWN">Unknown</option>
+                                                                                <option value="REGISTERED">Registered</option>
+                                                                                <option value="UNREGISTERED">Not Registered</option>
+                                                                            </select>
+                                                                        ) : (
+                                                                            <span className="text-xs font-bold text-slate-700">{biz.taxStatus || 'UNKNOWN'}</span>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </div>

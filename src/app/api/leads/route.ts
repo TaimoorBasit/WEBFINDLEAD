@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
                 email: body.email,
                 website: body.website,
                 websiteStatus: body.websiteStatus || "NO_WEBSITE",
+                taxStatus: body.taxStatus || "UNKNOWN",
                 placeId: placeId,
                 mapsUrl: outputMapsUrl,
                 rating: rating,

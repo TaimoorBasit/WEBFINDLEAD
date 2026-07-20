@@ -13,6 +13,7 @@ export default function LeadsPage() {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<WebsiteStatus | 'ALL'>('ALL');
     const [pipelineFilter, setPipelineFilter] = useState<string | 'ALL'>('ALL');
+    const [taxFilter, setTaxFilter] = useState<string | 'ALL'>('ALL');
     const { data: session, status } = useSession();
     const router = useRouter();
 
@@ -24,6 +25,35 @@ export default function LeadsPage() {
         }
         fetchLeads();
     }, [session, status]);
+
+    // Auto-scan tax statuses for UNKNOWN leads with websites
+    useEffect(() => {
+        if (leads.length === 0) return;
+        
+        const scanUnknownTaxes = async () => {
+            const leadsToScan = leads.filter(l => (l.taxStatus === 'UNKNOWN' || !l.taxStatus) && l.website);
+            if (leadsToScan.length === 0) return;
+
+            // Process in batches to avoid overwhelming the server/network
+            for (const lead of leadsToScan) {
+                try {
+                    const res = await axios.post('/api/leads/check-tax', { id: lead.id, website: lead.website });
+                    if (res.data && res.data.taxStatus) {
+                        setLeads(prevLeads => prevLeads.map(l => l.id === lead.id ? { ...l, taxStatus: res.data.taxStatus } : l));
+                    }
+                } catch (error) {
+                    console.error("Failed to auto-scan tax for lead:", lead.name, error);
+                }
+            }
+        };
+
+        // We use a small timeout to let the UI render first
+        const timeoutId = setTimeout(() => {
+            scanUnknownTaxes();
+        }, 2000);
+        
+        return () => clearTimeout(timeoutId);
+    }, [leads.length]);
 
     const fetchLeads = async () => {
         setLoading(true);
@@ -60,6 +90,16 @@ export default function LeadsPage() {
         }
     };
 
+    const handleUpdateTaxStatus = async (bizId: string, newTaxStatus: string) => {
+        try {
+            await axios.patch(`/api/leads`, { id: bizId, taxStatus: newTaxStatus });
+            setLeads(leads.map(l => l.id === bizId ? { ...l, taxStatus: newTaxStatus } : l));
+        } catch (error) {
+            console.error("Update tax status failed:", error);
+            alert("Failed to update tax status");
+        }
+    };
+
     const exportLeads = () => {
         const headers = ["Name", "Category", "Phone", "Email", "Website", "Status", "Rating", "Reviews", "Address", "Maps Link", "Socials"];
         const csvContent = [
@@ -92,7 +132,8 @@ export default function LeadsPage() {
 
     const filteredLeads = leads.filter(biz =>
         (statusFilter === 'ALL' || biz.websiteStatus === statusFilter) &&
-        (pipelineFilter === 'ALL' || biz.status === pipelineFilter)
+        (pipelineFilter === 'ALL' || biz.status === pipelineFilter) &&
+        (taxFilter === 'ALL' || (biz.taxStatus || 'UNKNOWN') === taxFilter)
     );
 
     return (
@@ -151,6 +192,17 @@ export default function LeadsPage() {
                             <option value="LOST">Lost</option>
                             <option value="CLOSED">Closed / Won</option>
                         </select>
+
+                        <select
+                            className="bg-card border border-border rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-primary outline-none"
+                            value={taxFilter}
+                            onChange={(e) => setTaxFilter(e.target.value)}
+                        >
+                            <option value="ALL">All Tax Status</option>
+                            <option value="UNKNOWN">Unknown</option>
+                            <option value="REGISTERED">Registered</option>
+                            <option value="UNREGISTERED">Not Registered</option>
+                        </select>
                     </div>
                 </div>
 
@@ -159,6 +211,7 @@ export default function LeadsPage() {
                     isLoading={loading}
                     onRemove={handleDelete}
                     onUpdateStatus={handleUpdateStatus}
+                    onUpdateTaxStatus={handleUpdateTaxStatus}
                     savedIds={[
                         ...leads.map(l => l.placeId).filter(Boolean),
                         ...leads.map(l => normalizeMapsUrl(l.mapsUrl)).filter(Boolean)

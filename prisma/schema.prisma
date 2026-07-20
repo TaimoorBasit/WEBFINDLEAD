@@ -89,6 +89,7 @@ model Lead {
   website       String?
   websiteStatus String   @default("NO_WEBSITE")
   status        String   @default("NEW") // "NEW", "CONTACTED", "INTERESTED", "LOST", "CLOSED"
+  taxStatus     String   @default("UNKNOWN") // "REGISTERED", "UNREGISTERED", "UNKNOWN"
   rating        Float?
   reviews       Int?
   socials       String?  @db.Text // JSON string for social links

@@ -10,10 +10,11 @@ export interface WebsiteAnalysis {
     ads: { facebook: boolean; google: boolean };
     hosting?: string;
     emailProvider?: string;
+    taxStatus?: string;
 }
 
 export async function analyzeWebsite(url?: string): Promise<WebsiteAnalysis> {
-    if (!url) return { status: 'NO_WEBSITE', emails: [], socials: {}, pixels: { facebook: false, google: false, tiktok: false }, ads: { facebook: false, google: false } };
+    if (!url) return { status: 'NO_WEBSITE', emails: [], socials: {}, pixels: { facebook: false, google: false, tiktok: false }, ads: { facebook: false, google: false }, taxStatus: 'UNKNOWN' };
 
     try {
         const startTime = Date.now();
@@ -80,9 +81,18 @@ export async function analyzeWebsite(url?: string): Promise<WebsiteAnalysis> {
         else if (lowerHtml.includes('shopify.com')) hosting = 'Shopify';
         else if (lowerHtml.includes('wix.com')) hosting = 'Wix';
 
-        return { status, emails, socials, pixels, ads, hosting, emailProvider };
+        // Tax Status Detection
+        let taxStatus = 'UNKNOWN';
+        const taxRegex = /(vat\s*number|vat\s*registration|tax\s*id|registered\s*company|company\s*registration|companies\s*house|abn|gst\s*number|employer\s*identification\s*number|ein\b)/i;
+        if (taxRegex.test(lowerHtml)) {
+            taxStatus = 'REGISTERED';
+        } else {
+            taxStatus = 'UNREGISTERED';
+        }
+
+        return { status, emails, socials, pixels, ads, hosting, emailProvider, taxStatus };
     } catch (error) {
-        return { status: 'LOW_QUALITY', emails: [], socials: {}, pixels: { facebook: false, google: false, tiktok: false }, ads: { facebook: false, google: false } };
+        return { status: 'LOW_QUALITY', emails: [], socials: {}, pixels: { facebook: false, google: false, tiktok: false }, ads: { facebook: false, google: false }, taxStatus: 'UNKNOWN' };
     }
 }
 

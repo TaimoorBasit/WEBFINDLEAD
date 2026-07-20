@@ -191,7 +191,8 @@ export default function SearchPage() {
                         pixels: analysis.pixels,
                         ads: analysis.ads,
                         hosting: analysis.hosting,
-                        emailProvider: analysis.emailProvider
+                        emailProvider: analysis.emailProvider,
+                        taxStatus: analysis.taxStatus
                     };
                 }
                 return biz;
@@ -256,6 +257,15 @@ export default function SearchPage() {
         } catch (error) {
             console.error("Remove failed:", error);
         }
+    };
+
+    const handleUpdateTaxStatus = (bizId: string, newTaxStatus: string) => {
+        setResults(prev => prev.map(biz => {
+            if (biz.id === bizId) {
+                return { ...biz, taxStatus: newTaxStatus };
+            }
+            return biz;
+        }));
     };
 
     const handleExport = () => {
@@ -403,6 +413,7 @@ export default function SearchPage() {
                                         savedIds={Object.keys(savedMap)}
                                         onSave={saveLead}
                                         onRemove={removeLead}
+                                        onUpdateTaxStatus={handleUpdateTaxStatus}
                                     />
                                     {nextStart !== undefined && (
                                         <div className="flex justify-center pt-8">
