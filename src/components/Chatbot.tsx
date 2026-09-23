@@ -55,7 +55,7 @@ const KB: { keywords: string[]; answer: string }[] = [
             // Turkish
             "nasıl bulunur", "arama", "müşteri bul",
         ],
-        answer: "🔍 **How to Find Leads:**\n1. Click **'Find Leads'** in the sidebar\n2. Enter a **business category** (e.g. Dentist, Plumber, Bakery, Gym)\n3. Enter a **location** (e.g. New York, London, Dubai)\n4. Click **Search** — results appear instantly!\n\nEach result shows the business website status, rating, phone, and contact info. 🎯"
+        answer: "🔍 **How to Find Leads:**\n1. Click **'Find Leads'** in the sidebar\n2. Enter a **location** (e.g. Dallas, TX) and a **business category** (e.g. Dentist, Plumber, HVAC)\n3. Click the **Find Leads** button\n\nYou get **all available results in one go** (up to 1000) — no extra steps. Each result shows website status, rating, phone and contact info. Use the filters (No Website, No Socials, Low Quality) to spot the best prospects. 🎯"
     },
     {
         keywords: [
@@ -214,7 +214,7 @@ const KB: { keywords: string[]; answer: string }[] = [
             // Turkish
             "giriş yap", "oturum aç",
         ],
-        answer: "🔐 **Sign In to Your Account:**\n1. Click **'Sign In / Sign Up'** from the sidebar\n2. Enter your **email and password**\n3. Click **Sign In** → you'll land on your dashboard\n\nForgot your password? Go to **Settings → Account → Change Password** or contact support."
+        answer: "🔐 **Sign In to Your Account:**\n1. Click **'Sign In / Sign Up'** from the sidebar\n2. Enter your **email (or username) and password** — use the 👁️ eye icon to show what you typed\n3. Click **Sign In** → you'll land on your dashboard\n\nForgot your password? Click **Forgot password?** under the password field and we'll email you a reset link."
     },
     {
         keywords: [
@@ -239,8 +239,8 @@ const KB: { keywords: string[]; answer: string }[] = [
     {
         keywords: [
             // English
-            "password", "change password", "forgot password", "reset password", "update password",
-            "new password", "old password", "lost password",
+            "password", "change password", "update password", "new password", "old password",
+            "change my password", "settings password",
             // Urdu
             "پاس ورڈ بھول گیا", "پاس ورڈ تبدیل",
             // Arabic
@@ -254,7 +254,7 @@ const KB: { keywords: string[]; answer: string }[] = [
             // Turkish
             "şifre", "şifre değiştir", "şifremi unuttum",
         ],
-        answer: "🔒 **Change Your Password:**\n1. Go to **Settings** in the sidebar\n2. Click the **Account** tab\n3. Enter your **current password**\n4. Enter and confirm your **new password**\n5. Click **Update Password** ✅\n\nMake sure your new password is at least 8 characters long."
+        answer: "🔒 **Change Your Password (while signed in):**\n1. Go to **Settings** in the sidebar\n2. Open the password section\n3. Enter your **current password**\n4. Enter and confirm your **new password**\n5. Click **Update Password** ✅\n\nForgot it instead? Use **Forgot password?** on the sign-in page."
     },
     {
         keywords: [
@@ -314,7 +314,7 @@ const KB: { keywords: string[]; answer: string }[] = [
             // Turkish
             "yardım", "sorun", "destek",
         ],
-        answer: "🆘 **Get Help & Support:**\n1. Go to **Help & Support** in the sidebar\n2. Fill in your **subject and message**\n3. Our team will respond as soon as possible ✅\n\nYou can also try:\n- Refreshing the page\n- Signing out and back in\n- Clearing browser cache"
+        answer: "🆘 **Get Help & Support:**\n1. Go to **Help & Support** in the sidebar\n2. Fill in your **subject and message** and submit — this opens a ticket\n3. Our team replies right inside the ticket (you also get an email) ✅\n\nUnder **My Tickets** you can open the conversation, **reply back**, and **close the ticket** once your issue is solved. A red badge on Help & Support means there's a new reply.\n\nYou can also try:\n- Refreshing the page\n- Signing out and back in\n- Clearing browser cache"
     },
     {
         keywords: [
@@ -448,44 +448,171 @@ const KB: { keywords: string[]; answer: string }[] = [
         ],
         answer: "😊 You're welcome! Happy to help anytime.\n\nIs there anything else I can assist you with? 🚀"
     },
+    {
+        keywords: [
+            // English
+            "forgot password", "forget password", "forgot my password", "reset password", "lost password",
+            "cant remember password", "password reset", "reset link", "recover account", "cant login",
+            "cannot login", "unable to login", "locked out", "password not working", "wrong password",
+            // Urdu
+            "پاس ورڈ بھول", "پاس ورڈ ری سیٹ",
+            // Arabic
+            "نسيت كلمة المرور", "استعادة كلمة المرور",
+            // Spanish
+            "olvidé mi contraseña", "restablecer contraseña", "recuperar contraseña",
+            // French
+            "mot de passe oublié", "réinitialiser mot de passe",
+            // Hindi
+            "पासवर्ड भूल", "पासवर्ड रीसेट",
+            // Turkish
+            "şifremi unuttum", "şifre sıfırla",
+        ],
+        answer: "🔑 **Forgot Your Password?**\n1. Go to the **Sign In** page\n2. Click **Forgot password?** under the password field\n3. Enter your **email** — we send you a reset link\n4. Open the email, click the link, and choose a **new password** (8+ characters, 1 uppercase, 1 number, 1 special character)\n5. Sign in with your new password ✅\n\nThe link works **once** and expires after **1 hour**. Not in your inbox? Check **Spam/Junk**."
+    },
+    {
+        keywords: [
+            "how many results", "number of results", "more results", "only 20 results", "limit results",
+            "results limit", "deep search", "all results", "load more", "maximum results", "how many leads show",
+            "why only", "1000 results", "100 results",
+        ],
+        answer: "📈 **How Many Results Do I Get?**\nEvery search automatically returns **all available businesses** for that location and category — up to **1000**. There's no separate deep-search option anymore.\n\nGoogle Maps sometimes has fewer businesses for a niche, so a narrow search may return less. For more, try a nearby city or a related category. 🗺️"
+    },
+    {
+        keywords: [
+            "ticket", "my tickets", "support ticket", "reply support", "support reply", "close ticket",
+            "ticket status", "did support reply", "support response", "reopen ticket", "issue solved",
+            "check my request", "help request",
+        ],
+        answer: "🎫 **Support Tickets:**\n1. **Help & Support** → submit a ticket (subject + message)\n2. Scroll to **My Tickets** and click a ticket to see the whole conversation\n3. Reply to our team right there — and you're emailed when we reply\n4. When it's fixed, click **My issue is solved — close ticket**\n\nStatuses: **Waiting for support** · **Support replied** · **Closed**. Replying to a closed ticket reopens it."
+    },
+    {
+        keywords: [
+            "show password", "hide password", "eye icon", "see password", "reveal password",
+        ],
+        answer: "👁️ **Show / Hide Password:**\nClick the **eye icon** on the right side of any password field to see what you typed. Click again to hide it."
+    },
+    {
+        keywords: [
+            "promo", "promo code", "coupon", "discount", "voucher", "offer code", "apply code",
+            "where to enter coupon", "redeem",
+        ],
+        answer: "🏷️ **Promo / Coupon Code:**\n1. Go to the **Homepage** and choose a plan (or open **Upgrade**)\n2. In the checkout window, type your code in the **coupon field**\n3. Click **Apply** — the discount shows instantly\n\nCodes can be limited by plan, uses or expiry date, so if one is rejected the message tells you why."
+    },
 ];
 
-// ─── Smart Matching with Scoring ─────────────────────────────────────────────
+// ─── Smart Matching (typo-tolerant, phrasing-tolerant) ────────────────────────
+const STOP = new Set([
+    "how", "do", "does", "did", "i", "to", "the", "a", "an", "my", "me", "can", "you", "u", "is", "it", "of", "for",
+    "on", "and", "in", "at", "what", "where", "when", "please", "want", "need", "will", "would", "should", "am",
+    "are", "be", "this", "that", "with", "from", "your", "our", "we", "there", "some", "any", "get", "make", "go",
+    "tell", "give", "guide", "explain", "about", "if", "so", "im", "ive", "hi",
+]);
+const SLANG: Record<string, string> = {
+    hw: "how", pls: "please", plz: "please", u: "you", r: "are", acc: "account", acct: "account", pw: "password",
+    pwd: "password", pass: "password", passwrd: "password", mail: "email", gmail: "email", info: "information",
+    signin: "signin", signup: "signup", logon: "login", logging: "login", registering: "signup", register: "signup",
+    registration: "signup", subscribe: "subscription", subscribed: "subscription", price: "pricing", prices: "pricing",
+    cost: "pricing", costs: "pricing", plans: "plan", csv: "export", download: "export", excel: "export",
+    sing: "signin", sgin: "signin", singin: "signin", leds: "leads", otp: "verification", verify: "verification", verified: "verification", buisness: "business", businesses: "business",
+};
+
+function normalize(text: string): string {
+    return text
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // strip accents (español -> espanol)
+        .replace(/(.)\1{2,}/g, "$1$1")                     // helllo -> hello
+        .replace(/e[\s-]?mail/g, "email")
+        .replace(/log[\s-]?in/g, "login")
+        .replace(/sign[\s-]?in/g, "signin")
+        .replace(/sign[\s-]?up/g, "signup")
+        .replace(/can'?t|cannot|can not/g, "cant")
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+// Typo'd slang words ("dowload" -> download -> export)
+const SLANG_KEYS = Object.keys(SLANG).filter((k) => k.length >= 5);
+function fixSlang(w: string): string {
+    if (w.length < 5) return w;
+    const hit = SLANG_KEYS.find((k) => similar(w, k));
+    return hit ? SLANG[hit] : w;
+}
+
+function tokens(text: string, dropStop: boolean): string[] {
+    const all = normalize(text).split(" ").filter(Boolean).map((w) => SLANG[w] ?? fixSlang(w));
+    if (!dropStop) return all;
+    const kept = all.filter((w) => !STOP.has(w));
+    return kept.length ? kept : all;
+}
+
+const stem = (w: string) => (w.length > 4 ? w.replace(/(ing|ed|es|s)$/, "") : w);
+
+// Damerau-Levenshtein (handles swapped letters like "pasword"/"paswrod")
+function distance(a: string, b: string): number {
+    const d: number[][] = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+    for (let j = 0; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+            if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+        }
+    }
+    return d[a.length][b.length];
+}
+
+function similar(a: string, b: string): boolean {
+    if (a === b || stem(a) === stem(b)) return true;
+    const len = Math.min(a.length, b.length);
+    if (len <= 3 || a[0] !== b[0]) return false;
+    return distance(a, b) <= (len <= 8 ? 1 : 2);
+}
+
+const isLatin = (t: string) => !/[^\u0000-\u024F]/.test(t);
+
+// Pre-compute keyword tokens once
+const INDEX = KB.map((entry) => ({
+    entry,
+    keys: entry.keywords.map((kw) => ({ raw: normalize(kw), latin: isLatin(kw), words: tokens(kw, true) })),
+}));
+
 function getBotResponse(userInput: string): string {
-    const lower = userInput.toLowerCase().trim();
+    const norm = normalize(userInput);
+    const inputTokens = tokens(userInput, true);
+    if (!norm) return FALLBACK;
 
     let bestScore = 0;
     let bestAnswer = "";
 
-    for (const entry of KB) {
-        let score = 0;
-        for (const kw of entry.keywords) {
-            if (lower === kw) {
-                score += 10; // Exact match
-            } else if (lower.includes(kw)) {
-                score += 5; // Input contains keyword
-            } else if (kw.includes(lower) && lower.length > 2) {
-                score += 3; // Keyword contains input
-            } else {
-                // Word-level partial match
-                const inputWords = lower.split(/\s+/);
-                const kwWords = kw.split(/\s+/);
-                const matches = inputWords.filter(w => kwWords.includes(w) && w.length > 2);
-                score += matches.length * 2;
+    for (const { entry, keys } of INDEX) {
+        const hits: number[] = [];
+        for (const k of keys) {
+            if (!k.raw) continue;
+            if (!k.latin) {
+                // Urdu / Arabic / Hindi: plain substring match
+                if (norm.includes(k.raw)) hits.push(5 + k.raw.length / 10);
+                continue;
             }
+            if (norm === k.raw) { hits.push(10); continue; }
+            const matched = k.words.filter((w) => inputTokens.some((t) => similar(t, w))).length;
+            if (matched === k.words.length) hits.push(3 * matched + (norm.includes(k.raw) ? 2 : 0));
         }
+        if (!hits.length) continue;
+        hits.sort((x, y) => y - x);
+        // best keyword + a small bonus for corroborating keywords
+        const score = hits[0] + Math.min(hits.length - 1, 4) * 0.5;
         if (score > bestScore) {
             bestScore = score;
             bestAnswer = entry.answer;
         }
     }
 
-    if (bestScore >= 2 && bestAnswer) {
-        return bestAnswer;
-    }
-
-    return "🤔 I didn't quite understand that. You can ask me about:\n\n- **Finding leads** — how to search\n- **Pricing** — plans & costs\n- **My Leads** — managing your saved leads\n- **Export** — download to CSV\n- **Account & Settings**\n- **Website Audit** tool\n\nOr visit **Help & Support** in the sidebar for direct help! 💬";
+    return bestScore >= 3 && bestAnswer ? bestAnswer : FALLBACK;
 }
+
+const FALLBACK =
+    "🤔 I can only help with questions about **WebFindLead**, and I didn't quite get that. Try asking about:\n\n- **Signing in / signing up** and **forgot password**\n- **Finding leads** — how to search\n- **Saving & exporting** your leads\n- **Pricing**, plans & promo codes\n- **Settings**, balance & account\n- **Support tickets** and the **Website Audit** tool\n\nOr open **Help & Support** in the sidebar to talk to our team! 💬";
 
 // ─── Quick Prompts ────────────────────────────────────────────────────────────
 const QUICK_PROMPTS = [
@@ -535,20 +662,37 @@ export default function Chatbot() {
         }
     }, [messages, loading]);
 
-    const sendMessage = (text: string) => {
+    const sendMessage = async (text: string) => {
         if (!text.trim() || loading) return;
 
         const userMsg: Message = { role: "user", content: text };
-        setMessages(prev => [...prev, userMsg]);
+        const history = [...messages, userMsg];
+        setMessages(history);
         setInput("");
         setShowQuickPrompts(false);
         setLoading(true);
 
-        setTimeout(() => {
-            const reply = getBotResponse(text);
-            setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-            setLoading(false);
-        }, 500);
+        // Ask the AI first; if it's unavailable for any reason, fall back to the built-in matcher
+        let reply: string;
+        try {
+            const res = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ messages: history }),
+            });
+            if (res.status === 429) {
+                reply = "⏳ You're sending messages quickly — please wait a few minutes and try again.";
+            } else if (!res.ok) {
+                throw new Error(String(res.status));
+            } else {
+                reply = (await res.json()).reply;
+            }
+        } catch {
+            reply = getBotResponse(text);
+        }
+
+        setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+        setLoading(false);
     };
 
     const handleSubmit = (e?: React.FormEvent) => {
