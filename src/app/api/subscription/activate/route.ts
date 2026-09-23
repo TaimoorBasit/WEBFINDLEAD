@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
 
         // Validate Coupon
         let discountPercent = 0;
+        let usedCode = "";
         if (couponCode) {
             const coupon = await prisma.coupon.findUnique({
                 where: { code: couponCode }
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 discountPercent = coupon.percent;
+                usedCode = coupon.code;
 
                 // Increment usage
                 await prisma.coupon.update({
@@ -68,6 +70,7 @@ export async function POST(req: NextRequest) {
                 planType: planType,
                 leadsBalance: leadsAmount,
                 // Map legacy plan field too
+                ...(usedCode ? { couponUsed: usedCode } : {}),
                 plan: planType === 'pro' ? 'PRO_MONTHLY_99' : 'PRO_MONTHLY_20'
             }
         });

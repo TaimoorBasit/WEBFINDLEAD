@@ -177,13 +177,14 @@ export default function AdminDashboard({
                                     <th className="p-3 text-xs font-bold uppercase text-gray-500">Name</th>
                                     <th className="p-3 text-xs font-bold uppercase text-gray-500">Email</th>
                                     <th className="p-3 text-xs font-bold uppercase text-gray-500">Plan</th>
+                                    <th className="p-3 text-xs font-bold uppercase text-gray-500">Promo Used</th>
                                     <th className="p-3 text-xs font-bold uppercase text-gray-500">Leads</th>
                                     <th className="p-3 text-xs font-bold uppercase text-gray-500">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {users.length === 0 ? (
-                                    <tr><td colSpan={5} className="p-4 text-center">No users found</td></tr>
+                                    <tr><td colSpan={6} className="p-4 text-center">No users found</td></tr>
                                 ) : users.map((user) => (
                                     <tr key={user.id} className="border-b hover:bg-gray-50 transition-colors">
                                         <td className="p-3 font-medium">{user.name || 'N/A'}</td>
@@ -192,6 +193,13 @@ export default function AdminDashboard({
                                             <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-600">
                                                 {user.plan || 'Free'}
                                             </span>
+                                        </td>
+                                        <td className="p-3">
+                                            {user.couponUsed ? (
+                                                <span className="px-2 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 font-mono">{user.couponUsed}</span>
+                                            ) : (
+                                                <span className="text-gray-300">—</span>
+                                            )}
                                         </td>
                                         <td className="p-3 font-bold">{user.leadsBalance}</td>
                                         <td className="p-3 flex gap-2">

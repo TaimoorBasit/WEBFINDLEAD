@@ -46,6 +46,7 @@ model User {
   leadsBalance  Int       @default(3) // Acts as trialLeadsRemaining
   subscriptionStatus String @default("trial") // "trial", "active", "expired"
   planType      String    @default("trial") // "trial", "basic", "pro"
+  couponUsed    String?   // promo code the user last activated a plan with
   plan          String?   // "FREE", "PRO_MONTHLY_20" (Legacy mapped to planType)
   isBlocked     Boolean   @default(false)
   createdAt     DateTime  @default(now())
