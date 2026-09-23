@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
                 planType: planType,
                 leadsBalance: leadsAmount,
                 // Map legacy plan field too
-                ...(usedCode ? { couponUsed: usedCode } : {}),
+                ...(usedCode ? { couponUsed: usedCode, couponUsedAt: new Date() } : {}),
                 plan: planType === 'pro' ? 'PRO_MONTHLY_99' : 'PRO_MONTHLY_20'
             }
         });
