@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { X, Send, Minus, ChevronRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -577,7 +578,18 @@ const INDEX = KB.map((entry) => ({
     keys: entry.keywords.map((kw) => ({ raw: normalize(kw), latin: isLatin(kw), words: tokens(kw, true) })),
 }));
 
-function getBotResponse(userInput: string): string {
+// Topics that need an account; visitors get a sign-up nudge instead
+const NEEDS_LOGIN = ["🔍 **How to Find", "💾 **How to Save", "📋 **My Leads", "📥 **Export", "🔎 **Website Audit", "📊 **Leads Balance", "🎯 **Finding the Best", "📈 **How Many Results"];
+const SIGN_IN_FIRST =
+    "🔒 You need a free account for that. Here's how to start:\n\n1. Click **'Sign In / Sign Up'** in the sidebar\n2. Create an account with your **name, email and password**\n3. Enter the **6-digit code** we email you (check Spam)\n4. Sign in — the **Free Trial** gives you **3 leads**, no card needed\n\nOnce you're in, I can guide you through finding and saving leads! 🚀";
+
+function getBotResponse(userInput: string, signedIn = true): string {
+    const answer = matchAnswer(userInput);
+    if (!signedIn && NEEDS_LOGIN.some((p) => answer.startsWith(p))) return SIGN_IN_FIRST;
+    return answer;
+}
+
+function matchAnswer(userInput: string): string {
     const norm = normalize(userInput);
     const inputTokens = tokens(userInput, true);
     if (!norm) return FALLBACK;
@@ -644,6 +656,8 @@ function formatMessage(text: string) {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function Chatbot() {
+    const { status } = useSession();
+    const signedIn = status === "authenticated";
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -688,7 +702,7 @@ export default function Chatbot() {
                 reply = (await res.json()).reply;
             }
         } catch {
-            reply = getBotResponse(text);
+            reply = getBotResponse(text, signedIn);
         }
 
         setMessages(prev => [...prev, { role: "assistant", content: reply }]);

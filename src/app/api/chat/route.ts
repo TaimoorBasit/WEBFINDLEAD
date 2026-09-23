@@ -70,21 +70,32 @@ const MAX_CHARS = 1000;
 
 // ponytail: in-memory per-instance limit; use Redis/Upstash if traffic spans many serverless instances
 const hits = new Map<string, number[]>();
-function limited(userId: string) {
+function limited(key: string, max: number) {
     const now = Date.now();
-    const recent = (hits.get(userId) || []).filter((t) => now - t < 10 * 60 * 1000);
-    if (recent.length >= 20) return true;
+    const recent = (hits.get(key) || []).filter((t) => now - t < 10 * 60 * 1000);
+    if (recent.length >= max) return true;
     recent.push(now);
-    hits.set(userId, recent);
+    hits.set(key, recent);
     return false;
 }
 
+const VISITOR_RULES = `
+
+USER STATE: this person is NOT signed in (a visitor).
+- Visitors may ask general questions about WebFindLead, pricing, features, and how to sign up or sign in.
+- If a visitor asks you to find leads, search businesses, show leads, export, audit, or check a balance, do NOT help with the task itself. Explain they need an account first, that the Free Trial (3 leads, no card needed) is the quickest start, and walk them through signing up: click "Sign In / Sign Up" -> create an account with name, email and password -> enter the 6-digit code sent to their email -> sign in.
+- Never imply you can access, search or show any lead data.`;
+
+const USER_RULES = `
+
+USER STATE: this person is signed in. Give full guidance on every feature.`;
+
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    if (limited(session.user.id)) {
+    const signedIn = !!session?.user?.id;
+    // Visitors are limited per IP and more tightly than signed-in users
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+    if (signedIn ? limited(session!.user.id, 20) : limited(`ip:${ip}`, 10)) {
         return NextResponse.json({ error: "Too many messages. Please wait a few minutes." }, { status: 429 });
     }
 
@@ -112,7 +123,7 @@ export async function POST(req: NextRequest) {
         const ai = new GoogleGenAI({ apiKey });
         const chat = ai.chats.create({
             model: MODEL,
-            config: { systemInstruction: SYSTEM_PROMPT, maxOutputTokens: 600, temperature: 0.4 },
+            config: { systemInstruction: SYSTEM_PROMPT + (signedIn ? USER_RULES : VISITOR_RULES), maxOutputTokens: 600, temperature: 0.4 },
             history: turns.slice(0, -1).map((t: any) => ({ role: t.role, parts: [{ text: t.text }] })),
         });
 
