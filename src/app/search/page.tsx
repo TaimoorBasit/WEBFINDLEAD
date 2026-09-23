@@ -34,7 +34,8 @@ import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { normalizeMapsUrl } from "@/lib/url-utils";
 import { useRouter } from "next/navigation";
-import PricingModal from "@/components/PricingModal";
+import dynamic from "next/dynamic";
+const PricingModal = dynamic(() => import("@/components/PricingModal"), { ssr: false });
 
 export default function SearchPage() {
     const router = useRouter();
@@ -46,7 +47,6 @@ export default function SearchPage() {
     const [savedMap, setSavedMap] = useState<Record<string, string>>({});
     const [filter, setFilter] = useState<"ALL" | "NO_WEBSITE" | "NO_SOCIALS" | "LOW_QUALITY">("ALL");
     const [showPricing, setShowPricing] = useState(false);
-    const [isDeep, setIsDeep] = useState(false);
     const { data: session, update } = useSession();
     const [balance, setBalance] = useState<number>(0);
 
@@ -91,6 +91,15 @@ export default function SearchPage() {
         return true;
     });
 
+    const stats = {
+        withSite: results.filter(b => !!b.website).length,
+        noSite: results.filter(b => b.websiteStatus === "NO_WEBSITE").length,
+        withSocials: results.filter(b => b.socials && Object.keys(b.socials).length > 0).length,
+    };
+
+    // Map reloads only when a search is submitted, not on every keystroke
+    const [mapTerms, setMapTerms] = useState({ query: "", location: "" });
+
     const [error, setError] = useState<string | null>(null);
 
     const handleSearch = async (isLoadMore = false) => {
@@ -102,6 +111,7 @@ export default function SearchPage() {
 
         setLoading(true);
         setError(null);
+        if (!isLoadMore) setMapTerms({ query, location });
 
         // Clear previous results if it's a new search to avoid stale data
         if (!isLoadMore) {
@@ -111,10 +121,8 @@ export default function SearchPage() {
 
         try {
             const startParam = isLoadMore && nextStart ? `&start=${nextStart}` : '';
-            const deepParam = isDeep ? '&all=true' : '';
-            const searchUrl = `/api/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}${startParam}${deepParam}`;
+            const searchUrl = `/api/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}${startParam}`;
             console.log('Searching at:', searchUrl, {
-                isDeep,
                 isLoadMore,
                 nextStart,
                 sessionStatus: !!session,
@@ -128,7 +136,7 @@ export default function SearchPage() {
             // Update balance from server response (decremented on search)
             if (typeof response.data.remainingBalance === 'number') {
                 setBalance(response.data.remainingBalance);
-                await update(); // Sync session
+                update(); // Sync session (non-blocking)
             }
 
             setResults((prev: Business[]) => {
@@ -290,11 +298,11 @@ export default function SearchPage() {
     };
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <div className="flex flex-col h-full overflow-hidden bg-background">
             <div className="flex-none bg-card border-b border-border z-20 shadow-sm">
-                <div className="max-w-[1920px] mx-auto p-4 lg:px-8">
-                    <form onSubmit={(e) => { e.preventDefault(); handleSearch(false); }} className="flex flex-col lg:flex-row gap-4 items-end lg:items-center">
-                        <div className="flex-none lg:mr-8 hidden xl:block">
+                <div className="p-3 lg:px-4">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSearch(false); }} className="flex flex-col lg:flex-row gap-3 items-end lg:items-center">
+                        <div className="flex-none lg:mr-4 hidden xl:block">
                             <h1 className="text-2xl font-black tracking-tight text-foreground leading-none">
                                 Find <span className="text-primary italic font-serif">Leads</span>
                             </h1>
@@ -303,17 +311,17 @@ export default function SearchPage() {
 
                         {/* Balance Badge */}
                         {session?.user && (
-                            <div className="hidden lg:flex flex-col items-end mr-6">
+                            <div className="hidden lg:flex flex-col items-end mr-3">
                                 <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
                                     {(session.user as any).plan === 'FREE' || !(session.user as any).plan ? 'Trial Leads' : 'Balance'}
                                 </span>
-                                <span className={`text-2xl font-black ${balance > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                                <span className={`text-xl font-black ${balance > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                                     {(session.user as any).role === 'ADMIN' ? '∞' : balance}
                                 </span>
                             </div>
                         )}
 
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
                             <div className="relative group">
                                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4 group-focus-within:text-primary transition-colors" />
                                 <input
@@ -321,7 +329,7 @@ export default function SearchPage() {
                                     placeholder="City, State (e.g., Dallas, TX)"
                                     value={location}
                                     onChange={(e) => setLocation(e.target.value)}
-                                    className="w-full bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl py-3 pl-10 pr-4 font-medium text-sm transition-all outline-none"
+                                    className="w-full bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl py-2.5 pl-10 pr-4 font-medium text-sm transition-all outline-none"
                                     required
                                 />
                             </div>
@@ -332,30 +340,18 @@ export default function SearchPage() {
                                     placeholder="Niche (e.g., Plumber, Dentist)"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
-                                    className="w-full bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl py-3 pl-10 pr-4 font-medium text-sm transition-all outline-none"
+                                    className="w-full bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-xl py-2.5 pl-10 pr-4 font-medium text-sm transition-all outline-none"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="flex items-center gap-3 w-full lg:w-auto">
-                            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-xl border border-slate-200">
-                                <input
-                                    type="checkbox"
-                                    id="deepSearch"
-                                    checked={isDeep}
-                                    onChange={(e) => setIsDeep(e.target.checked)}
-                                    className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
-                                />
-                                <label htmlFor="deepSearch" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer select-none">
-                                    Deep Search
-                                </label>
-                            </div>
 
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 lg:flex-none bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold text-sm tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50 min-w-[120px]"
+                                className="flex-1 lg:flex-none bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold text-sm tracking-wide hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-[0.98] disabled:opacity-50 min-w-[120px]"
                             >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Find Leads"}
                             </button>
@@ -364,7 +360,7 @@ export default function SearchPage() {
                                 <button
                                     type="button"
                                     onClick={handleExport}
-                                    className="flex-none px-4 py-3 bg-emerald-600/10 text-emerald-600 border border-emerald-600/20 rounded-xl font-bold text-sm hover:bg-emerald-600/20 transition-all flex items-center gap-2"
+                                    className="flex-none px-4 py-2.5 bg-emerald-600/10 text-emerald-600 border border-emerald-600/20 rounded-xl font-bold text-sm hover:bg-emerald-600/20 transition-all flex items-center gap-2"
                                 >
                                     <Download className="w-4 h-4" />
                                     <span className="hidden sm:inline">Export</span>
@@ -375,39 +371,65 @@ export default function SearchPage() {
                 </div>
             </div >
 
-            <div className="flex-1 flex overflow-hidden relative">
-                <div className="flex-1 flex flex-col min-w-0 bg-muted/10 relative z-10 overflow-hidden">
-                    {(results.length > 0 || loading) && (
-                        <div className="flex-none p-4 lg:px-8 border-b border-border bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="text-sm font-medium text-slate-500">
-                                Found <span className="text-slate-900 font-bold">{filteredResults.length}</span> results
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {["ALL", "NO_WEBSITE", "NO_SOCIALS", "LOW_QUALITY"].map((opt: string) => (
-                                    <button
-                                        key={opt}
-                                        onClick={() => setFilter(opt as "ALL" | "NO_WEBSITE" | "NO_SOCIALS" | "LOW_QUALITY")}
-                                        className={cn(
-                                            "px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase transition-all border",
-                                            filter === opt ? "bg-primary text-white border-primary" : "bg-white border-border text-muted-foreground hover:border-primary/50"
-                                        )}
-                                    >
-                                        {opt.replace("_", " ")}
-                                    </button>
-                                ))}
-                            </div>
+            <div className="flex-1 flex overflow-hidden relative gap-3 p-3 bg-muted/30">
+                <div className="flex-1 flex flex-col min-w-0 relative z-10 overflow-hidden gap-3">
+                    {results.length > 0 && !loading && (
+                        <div className="flex-none grid grid-cols-2 xl:grid-cols-4 gap-3">
+                            {[
+                                { label: "Total Results", value: results.length, icon: Target, tone: "bg-indigo-50 text-indigo-600" },
+                                { label: "Has Website", value: stats.withSite, icon: Globe, tone: "bg-emerald-50 text-emerald-600", pct: stats.withSite },
+                                { label: "No Website", value: stats.noSite, icon: AlertCircle, tone: "bg-red-50 text-red-600", pct: stats.noSite },
+                                { label: "With Socials", value: stats.withSocials, icon: Instagram, tone: "bg-pink-50 text-pink-600", pct: stats.withSocials },
+                            ].map((c) => (
+                                <div key={c.label} className="bg-card border border-border rounded-2xl px-3 py-2.5 flex items-center gap-3 shadow-sm">
+                                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center flex-none", c.tone)}>
+                                        <c.icon className="w-4 h-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-baseline gap-1.5">
+                                            <span className="text-xl font-black leading-none text-slate-900">{c.value}</span>
+                                            {c.pct !== undefined && (
+                                                <span className="text-[10px] font-bold text-slate-400">{Math.round((c.pct / results.length) * 100)}%</span>
+                                            )}
+                                        </div>
+                                        <span className="text-[11px] font-semibold text-slate-500 truncate block">{c.label}</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
 
-                    <div className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
-                        <div className="max-w-5xl mx-auto">
+                    <div className="flex-1 min-h-0 flex flex-col bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                        {(results.length > 0 || loading) && (
+                            <div className="flex-none px-3 py-2.5 border-b border-border flex flex-wrap items-center justify-between gap-2">
+                                <div className="text-sm font-medium text-slate-500">
+                                    Found <span className="text-slate-900 font-bold">{filteredResults.length}</span> results
+                                </div>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                    {["ALL", "NO_WEBSITE", "NO_SOCIALS", "LOW_QUALITY"].map((opt: string) => (
+                                        <button
+                                            key={opt}
+                                            onClick={() => setFilter(opt as "ALL" | "NO_WEBSITE" | "NO_SOCIALS" | "LOW_QUALITY")}
+                                            className={cn(
+                                                "px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase transition-all border",
+                                                filter === opt ? "bg-primary text-white border-primary" : "bg-white border-border text-muted-foreground hover:border-primary/50"
+                                            )}
+                                        >
+                                            {opt.replace("_", " ")}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 opacity-50">
                                     <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                                     <p className="font-bold text-slate-400">Scanning for high-intent leads...</p>
                                 </div>
                             ) : filteredResults.length > 0 ? (
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     <ResultsTable
                                         businesses={filteredResults}
                                         savedIds={Object.keys(savedMap)}
@@ -416,10 +438,10 @@ export default function SearchPage() {
                                         onUpdateTaxStatus={handleUpdateTaxStatus}
                                     />
                                     {nextStart !== undefined && (
-                                        <div className="flex justify-center pt-8">
+                                        <div className="flex justify-center pt-2">
                                             <button
                                                 onClick={() => handleSearch(true)}
-                                                className="flex items-center gap-2 px-8 py-3 bg-white border border-border rounded-xl font-bold text-sm hover:shadow-lg transition-all"
+                                                className="flex items-center gap-2 px-6 py-2.5 bg-white border border-border rounded-xl font-bold text-sm hover:shadow-lg transition-all"
                                             >
                                                 Load More Results <ArrowRight className="w-4 h-4" />
                                             </button>
@@ -442,8 +464,8 @@ export default function SearchPage() {
                     </div>
                 </div>
 
-                <div className="hidden lg:block w-[35%] xl:w-[30%] relative border-l border-border bg-muted">
-                    <MapView query={query} location={location} />
+                <div className="hidden lg:block w-[28%] xl:w-[26%] relative border border-border rounded-2xl overflow-hidden shadow-sm bg-muted">
+                    <MapView query={mapTerms.query} location={mapTerms.location} />
                 </div>
             </div>
             <PricingModal isOpen={showPricing} onClose={() => setShowPricing(false)} />

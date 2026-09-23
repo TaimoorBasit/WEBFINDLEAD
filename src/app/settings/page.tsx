@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Shield, CreditCard, Check, AlertCircle, Loader2, Plus } from "lucide-react";
 import axios from "axios";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function SettingsPage() {
     const { data: session, update } = useSession();
@@ -135,7 +136,7 @@ export default function SettingsPage() {
     const isPlanCanceled = user?.subscriptionStatus === 'canceled';
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
             <div>
                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Settings</h1>
                 <p className="text-slate-500 font-medium mt-1">Manage your credentials, preferences, and subscription.</p>
@@ -221,8 +222,7 @@ export default function SettingsPage() {
                             <form onSubmit={handlePasswordChange} className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5 ml-1">Current Password</label>
-                                    <input
-                                        type="password"
+                                    <PasswordInput
                                         required
                                         value={currentPassword}
                                         onChange={(e) => setCurrentPassword(e.target.value)}
@@ -232,8 +232,7 @@ export default function SettingsPage() {
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5 ml-1">New Password</label>
-                                    <input
-                                        type="password"
+                                    <PasswordInput
                                         required
                                         minLength={6}
                                         value={newPassword}
@@ -244,8 +243,7 @@ export default function SettingsPage() {
 
                                 <div>
                                     <label className="block text-xs font-bold uppercase text-slate-500 mb-1.5 ml-1">Confirm New Password</label>
-                                    <input
-                                        type="password"
+                                    <PasswordInput
                                         required
                                         minLength={6}
                                         value={confirmPassword}

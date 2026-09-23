@@ -4,14 +4,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
 import { searchBusinesses, searchManyBusinesses } from '@/lib/serpapi';
 
+export const maxDuration = 300;
+
 export async function GET(req: NextRequest) {
-    console.log('Search API: GET request received', req.url);
     const session = await getServerSession(authOptions);
-    console.log('Search API: Session Check:', {
-        hasSession: !!session,
-        userId: session?.user?.id,
-        email: session?.user?.email
-    });
 
     if (!session || !session.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,7 +18,7 @@ export async function GET(req: NextRequest) {
     const location = searchParams.get('location');
     const startStr = searchParams.get('start');
     const start = startStr ? parseInt(startStr, 10) : 0;
-    const fetchAll = searchParams.get('all') === 'true';
+    const fetchAll = start === 0; // first search always fetches everything
 
     // Allow search if at least one parameter is provided
     if (!query && !location) {
@@ -32,12 +28,6 @@ export async function GET(req: NextRequest) {
     // 2. Check Subscription Logic
     const user = await prisma.user.findUnique({
         where: { id: session.user.id }
-    });
-
-    console.log('Search API: DB User Lookup:', {
-        requestedId: session.user.id,
-        found: !!user,
-        email: user?.email
     });
 
     if (!user) {
@@ -78,8 +68,8 @@ export async function GET(req: NextRequest) {
         // Allow Deep Search for everyone if requested, as long as it's the first page (start=0)
         // or if they are unlimited.
         if (fetchAll) {
-            // Deep search fetches up to 100 results in one go
-            const many = await searchManyBusinesses(effectiveQuery, location || "", 100);
+            // Fetch up to 1000 results in one go
+            const many = await searchManyBusinesses(effectiveQuery, location || "", 1000);
             rawResults = many.results;
             nextStart = many.nextStart;
         } else {

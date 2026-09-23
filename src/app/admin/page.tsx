@@ -26,8 +26,11 @@ export default async function AdminPage() {
                 include: { _count: { select: { leads: true } } }
             }),
             prisma.helpRequest.findMany({
-                orderBy: { createdAt: "desc" },
-                include: { user: { select: { name: true, email: true } } },
+                orderBy: { updatedAt: "desc" },
+                include: {
+                    user: { select: { name: true, email: true } },
+                    messages: { orderBy: { createdAt: "asc" } },
+                },
             }),
             prisma.lead.findMany({
                 orderBy: { createdAt: "desc" },

@@ -109,24 +109,26 @@ export async function searchBusinesses(query: string, location: string, start: n
  * @param maxResults Desired total results (will be rounded up to nearest 20)
  */
 export async function searchManyBusinesses(query: string, location: string, maxResults: number = 20) {
+    const BATCH = 5; // pages fetched in parallel
+    const PAGE = 20;
     let allResults: any[] = [];
-    let currentStart = 0;
     let nextStart: number | undefined = 0;
 
     while (allResults.length < maxResults && nextStart !== undefined) {
-        const { results, nextStart: ns } = await searchBusinesses(query, location, currentStart);
-        if (results.length === 0) break;
+        const offsets = Array.from({ length: BATCH }, (_, i) => nextStart! + i * PAGE);
+        const pages = await Promise.all(offsets.map((o) => searchBusinesses(query, location, o)));
 
-        allResults = [...allResults, ...results];
-        nextStart = ns;
-        currentStart = ns || 0;
-
-        // Safety break to prevent infinite loops or excessive credits usage
-        if (allResults.length >= 100) break;
+        // Consume in order and stop at the first page that ends the listing
+        for (const page of pages) {
+            if (page.results.length === 0) { nextStart = undefined; break; }
+            allResults = allResults.concat(page.results);
+            nextStart = page.nextStart;
+            if (nextStart === undefined || allResults.length >= maxResults) break;
+        }
     }
 
     return {
-        results: allResults,
+        results: allResults.slice(0, maxResults),
         nextStart
     };
 }

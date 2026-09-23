@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
     Copy,
@@ -85,6 +85,8 @@ export default function ResultsTable({
     savedIds = []
 }: ResultsTableProps) {
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const [visibleCount, setVisibleCount] = useState(100);
+    const sentinelRef = useRef<HTMLTableRowElement | null>(null);
     const [filterMissingPixels, setFilterMissingPixels] = useState(false);
     const [filterActiveAds, setFilterActiveAds] = useState(false);
     const [filterNeedsWebsite, setFilterNeedsWebsite] = useState(false);
@@ -156,6 +158,21 @@ export default function ResultsTable({
         alert("Pitch copied to clipboard!");
     };
 
+    // Progressive rendering: reveal 100 more rows whenever the sentinel scrolls into view
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const io = new IntersectionObserver(
+            (entries) => { if (entries[0].isIntersecting) setVisibleCount((c) => c + 100); },
+            { rootMargin: '600px' }
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [visibleCount, filteredBusinesses.length]);
+
+    // New search / filter changes start from the top again
+    useEffect(() => { setVisibleCount(100); }, [businesses.length, businesses[0]?.id, filterMissingPixels, filterActiveAds, filterNeedsWebsite]);
+
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center py-20 bg-card rounded-xl border border-border">
@@ -178,13 +195,13 @@ export default function ResultsTable({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             {/* Advanced Smart Filters */}
-            <div className="flex flex-wrap items-center gap-3 p-1">
+            <div className="flex flex-wrap items-center gap-2 p-0">
                 <button
                     onClick={() => setFilterMissingPixels(!filterMissingPixels)}
                     className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
                         filterMissingPixels
                             ? "bg-amber-500 text-white border-amber-600 shadow-lg shadow-amber-200"
                             : "bg-white text-slate-500 border-slate-200 hover:border-amber-300"
@@ -197,7 +214,7 @@ export default function ResultsTable({
                 <button
                     onClick={() => setFilterActiveAds(!filterActiveAds)}
                     className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
                         filterActiveAds
                             ? "bg-blue-600 text-white border-blue-700 shadow-lg shadow-blue-200"
                             : "bg-white text-slate-500 border-slate-200 hover:border-blue-300"
@@ -210,7 +227,7 @@ export default function ResultsTable({
                 <button
                     onClick={() => setFilterNeedsWebsite(!filterNeedsWebsite)}
                     className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
                         filterNeedsWebsite
                             ? "bg-red-500 text-white border-red-600 shadow-lg shadow-red-200"
                             : "bg-white text-slate-500 border-slate-200 hover:border-red-300"
@@ -240,30 +257,30 @@ export default function ResultsTable({
 
             <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto overflow-y-visible">
-                    <table className="min-w-full divide-y divide-border table-fixed">
+                    <table className="w-full divide-y divide-border table-fixed">
                         <thead className="bg-[#f8fafc]">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-[24rem] text-left">Business Detail</th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-48 text-left">Contact Info</th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-40 text-center">Socials</th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-32 text-center">
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 text-left">Business Detail</th>
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-44 text-left">Contact Info</th>
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-28 text-center">Socials</th>
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-24 text-center">
                                     <div className="flex items-center justify-center gap-1 group cursor-help" title="These are snippets of code (like Facebook Pixel or Google Tags) that track website visitors. If a business has these, they are likely already investing in marketing.">
                                         AD TRACKING
                                         <Info className="w-3 h-3 text-slate-300 group-hover:text-primary transition-colors" />
                                     </div>
                                 </th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-32 text-center">
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-20 text-center">
                                     <div className="flex items-center justify-center gap-1 group cursor-help" title="Checks if the business is currently paying for advertisements on Facebook or Google.">
                                         ACTIVE ADS
                                         <Info className="w-3 h-3 text-slate-300 group-hover:text-primary transition-colors" />
                                     </div>
                                 </th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-40 text-center">Category</th>
-                                <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-500 w-40 text-right">Actions</th>
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-32 text-center hidden 3xl:table-cell">Category</th>
+                                <th className="px-3 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 w-24 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                            {filteredBusinesses.map((biz) => {
+                            {filteredBusinesses.slice(0, visibleCount).map((biz) => {
                                 const normalized = normalizeMapsUrl(biz.mapsUrl);
                                 const isSaved = (biz.id && savedIds.includes(biz.id)) || (normalized && savedIds.includes(normalized));
 
@@ -273,7 +290,7 @@ export default function ResultsTable({
                                             className={`hover:bg-slate-50/80 transition-colors group cursor-pointer ${expandedId === biz.id ? 'bg-slate-50/80' : ''}`}
                                             onClick={(e) => toggleExpand(biz.id, e)}
                                         >
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="flex items-start gap-3">
                                                     <div className="mt-1 transition-transform group-hover:scale-110">
                                                         {expandedId === biz.id ? (
@@ -284,7 +301,7 @@ export default function ResultsTable({
                                                     </div>
                                                     <div className="flex flex-col gap-1 overflow-hidden">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-bold text-slate-900 text-[15px] leading-tight group-hover:text-primary transition-colors line-clamp-1" title={biz.name}>{biz.name}</span>
+                                                            <span className="font-bold text-slate-900 text-sm leading-tight group-hover:text-primary transition-colors line-clamp-1" title={biz.name}>{biz.name}</span>
                                                             {biz.websiteStatus === 'NO_WEBSITE' && (biz.rating || 0) >= 4 && (
                                                                 <span className="bg-amber-100 text-amber-700 text-[8px] font-black uppercase px-2 py-0.5 rounded-full border border-amber-200 animate-pulse whitespace-nowrap">
                                                                     High Priority
@@ -298,12 +315,12 @@ export default function ResultsTable({
                                                                 <span className="text-slate-400 font-medium">({biz.reviews || 0})</span>
                                                             </div>
                                                             <span className="text-slate-300">|</span>
-                                                            <span className="text-slate-500 truncate max-w-[200px]" title={biz.address}>{biz.address || "Local Area"}</span>
+                                                            <span className="text-slate-500 truncate max-w-[14rem]" title={biz.address}>{biz.address || "Local Area"}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="flex flex-col gap-1.5" onClick={(e) => e.stopPropagation()}>
                                                     {biz.email ? (
                                                         <div className="flex items-center gap-2 text-[11px] font-bold text-slate-600">
@@ -328,7 +345,7 @@ export default function ResultsTable({
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="flex items-center justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                                                     <span title="Facebook">{biz.socials?.facebook ? <Facebook className="w-3.5 h-3.5 text-blue-600" /> : <Facebook className="w-3.5 h-3.5 text-slate-200" />}</span>
                                                     <span title="Instagram">{biz.socials?.instagram ? <Instagram className="w-3.5 h-3.5 text-pink-600" /> : <Instagram className="w-3.5 h-3.5 text-slate-200" />}</span>
@@ -336,26 +353,26 @@ export default function ResultsTable({
                                                     <span title="X (Twitter)">{biz.socials?.twitter ? <Twitter className="w-3.5 h-3.5 text-sky-600" /> : <Twitter className="w-3.5 h-3.5 text-slate-200" />}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                                                     <div className={`w-2 h-2 rounded-full ${biz.pixels?.facebook ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-slate-200'}`} title={biz.pixels?.facebook ? "Facebook tracking active" : "No Facebook tracking"} />
                                                     <div className={`w-2 h-2 rounded-full ${biz.pixels?.google ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-slate-200'}`} title={biz.pixels?.google ? "Google tracking active" : "No Google tracking"} />
                                                     <div className={`w-2 h-2 rounded-full ${biz.pixels?.tiktok ? 'bg-black shadow-[0_0_8px_rgba(0,0,0,0.5)]' : 'bg-slate-200'}`} title={biz.pixels?.tiktok ? "TikTok tracking active" : "No TikTok tracking"} />
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-3 py-2.5">
                                                 <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                                                     <div className={`text-[10px] font-black ${biz.ads?.facebook ? 'text-blue-600' : 'text-slate-200'}`} title={biz.ads?.facebook ? "FB Ads active" : "No active FB ads"}>FB</div>
                                                     <div className={`text-[10px] font-black ${biz.ads?.google ? 'text-green-600' : 'text-slate-200'}`} title={biz.ads?.google ? "Google Ads active" : "No active Google ads"}>G</div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-center">
+                                            <td className="px-3 py-2.5 text-center hidden 3xl:table-cell">
                                                 <span className="text-[10px] font-black uppercase bg-slate-100 text-slate-600 px-2 py-1 rounded truncate inline-block max-w-full">
                                                     {biz.category || "General"}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                            <td className="px-3 py-2.5 text-right">
+                                                <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
@@ -364,7 +381,7 @@ export default function ResultsTable({
                                                             navigator.clipboard.writeText(url);
                                                             alert("Public Audit Link Copied! Send this to your client to impress them.");
                                                         }}
-                                                        className="p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all"
+                                                        className="p-2 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all"
                                                         title="Generate Public Audit Report"
                                                     >
                                                         <BarChart className="w-4 h-4" />
@@ -378,7 +395,7 @@ export default function ResultsTable({
                                                                     onSave(biz);
                                                                 }
                                                             }}
-                                                            className={`p-2.5 rounded-xl transition-all border ${isSaved ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'bg-primary text-primary-foreground border-primary/20 hover:shadow-lg hover:shadow-primary/20'}`}
+                                                            className={`p-2 rounded-xl transition-all border ${isSaved ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200' : 'bg-primary text-primary-foreground border-primary/20 hover:shadow-lg hover:shadow-primary/20'}`}
                                                             title={isSaved ? "Remove from Leads" : "Save Lead"}
                                                         >
                                                             {isSaved ? (
@@ -391,7 +408,7 @@ export default function ResultsTable({
                                                     {onRemove && !onSave && (
                                                         <button
                                                             onClick={() => onRemove(biz.id)}
-                                                            className="p-2.5 text-muted-foreground hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all"
+                                                            className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 rounded-xl transition-all"
                                                             title="Delete Lead"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
@@ -402,8 +419,8 @@ export default function ResultsTable({
                                         </tr>
                                         {expandedId === biz.id && (
                                             <tr className="bg-slate-50/50 border-t border-slate-100">
-                                                <td colSpan={7} className="px-8 py-8">
-                                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                                <td colSpan={7} className="px-4 py-5">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
                                                         {/* Overview */}
                                                         <div className="space-y-4">
                                                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
@@ -591,6 +608,9 @@ export default function ResultsTable({
                                     </React.Fragment>
                                 );
                             })}
+                            {visibleCount < filteredBusinesses.length && (
+                                <tr ref={sentinelRef}><td colSpan={7} className="py-3 text-center text-[11px] font-bold text-slate-400">Loading more…</td></tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

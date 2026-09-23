@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import AdminHelp from './AdminHelp';
 
 interface AdminDashboardProps {
     users: any[];
@@ -46,6 +47,17 @@ export default function AdminDashboard({
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleLeads = (userId: string, action: 'ADD_LEADS' | 'SUB_LEADS') => {
+        const input = prompt(`Enter leads amount to ${action === 'ADD_LEADS' ? 'add' : 'remove'}:`);
+        if (input === null) return;
+        const amount = Number(input);
+        if (!Number.isInteger(amount) || amount <= 0) {
+            alert('Please enter a whole number greater than 0');
+            return;
+        }
+        handleAction(userId, action, amount);
     };
 
     const handleCreateCoupon = async (e: React.FormEvent) => {
@@ -118,7 +130,7 @@ export default function AdminDashboard({
     };
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="p-2 bg-gray-50">
             <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
 
             {/* Tabs */}
@@ -145,7 +157,7 @@ export default function AdminDashboard({
                     onClick={() => setActiveTab('HELP')}
                     className={`px-4 py-2 font-bold text-sm uppercase tracking-wide rounded-t-lg transition-colors whitespace-nowrap ${activeTab === 'HELP' ? 'bg-white border text-primary border-b-white -mb-2.5 z-10' : 'text-gray-500 hover:text-gray-900'}`}
                 >
-                    Help Requests ({helpRequests.length})
+                    Help Requests ({helpRequests.filter((r) => r.status === 'OPEN').length} new)
                 </button>
                 <button
                     onClick={() => setActiveTab('SETTINGS')}
@@ -192,14 +204,18 @@ export default function AdminDashboard({
                                                 {user.isBlocked ? 'Unblock' : 'Block'}
                                             </button>
                                             <button
-                                                onClick={() => {
-                                                    const amount = prompt("Enter leads amount to add:");
-                                                    if (amount) handleAction(user.id, 'ADD_LEADS', parseInt(amount));
-                                                }}
+                                                onClick={() => handleLeads(user.id, 'ADD_LEADS')}
                                                 disabled={loading}
                                                 className="px-3 py-1 text-xs font-bold bg-indigo-500 text-white rounded shadow-sm hover:bg-indigo-600"
                                             >
                                                 + Leads
+                                            </button>
+                                            <button
+                                                onClick={() => handleLeads(user.id, 'SUB_LEADS')}
+                                                disabled={loading}
+                                                className="px-3 py-1 text-xs font-bold bg-orange-500 text-white rounded shadow-sm hover:bg-orange-600"
+                                            >
+                                                − Leads
                                             </button>
                                             <button
                                                 onClick={() => {
@@ -379,30 +395,7 @@ export default function AdminDashboard({
                     </div>
                 )}
 
-                {activeTab === 'HELP' && (
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-700">Help Requests</h2>
-                        {helpRequests.length === 0 ? (
-                            <p className="text-gray-500 italic text-center py-8">No help requests pending.</p>
-                        ) : (
-                            helpRequests.map((req) => (
-                                <div key={req.id} className="border p-4 rounded bg-gray-50 hover:bg-gray-100 transition-colors">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-gray-800">{req.subject}</h3>
-                                        <span className={`text-xs px-2 py-1 rounded-full font-bold ${req.status === 'OPEN' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                            {req.status}
-                                        </span>
-                                    </div>
-                                    <p className="text-sm text-gray-600 mb-2">{req.message}</p>
-                                    <div className="text-xs text-gray-500 flex justify-between pt-2 border-t border-gray-200 mt-2">
-                                        <span className="font-mono">From: {req.user.email}</span>
-                                        <span>{new Date(req.createdAt).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                )}
+                {activeTab === 'HELP' && <AdminHelp requests={helpRequests} />}
 
                 {activeTab === 'SETTINGS' && (
                     <div className="max-w-md mx-auto">

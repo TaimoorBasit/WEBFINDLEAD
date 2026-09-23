@@ -109,9 +109,22 @@ model HelpRequest {
   user      User     @relation(fields: [userId], references: [id])
   subject   String
   message   String   @db.Text
-  status    String   @default("OPEN")
+  status    String   @default("OPEN") // OPEN (waiting for admin), ANSWERED (waiting for user), CLOSED
+  userUnread Boolean @default(false) // admin replied and user hasn't opened it yet
+  messages  HelpMessage[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model HelpMessage {
+  id        String   @id @default(cuid())
+  requestId String
+  request   HelpRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  sender    String   // "USER" | "ADMIN"
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([requestId])
 }
 
 model Coupon {

@@ -16,10 +16,13 @@ import {
     Download
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import Chatbot from "./Chatbot";
+import dynamic from "next/dynamic";
+
+const Chatbot = dynamic(() => import("./Chatbot"), { ssr: false });
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -58,8 +61,18 @@ export default function RootLayout({
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { data: session, status } = useSession();
+    const pathname = usePathname();
+    const fullBleed = pathname === "/search";
 
     const [mounted, setMounted] = useState(false);
+    const [unread, setUnread] = useState(0);
+    useEffect(() => {
+        if (status !== "authenticated") return;
+        const load = () => fetch("/api/help/unread").then((r) => r.json()).then((d) => setUnread(d.count || 0)).catch(() => {});
+        load();
+        window.addEventListener("help-unread-changed", load);
+        return () => window.removeEventListener("help-unread-changed", load);
+    }, [status, pathname]);
     useEffect(() => {
         setMounted(true);
         document.documentElement.classList.remove("dark");
@@ -90,7 +103,7 @@ export default function RootLayout({
 
             {/* Sidebar */}
             <aside className={cn(
-                "fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border/50 transform transition-all duration-500 ease-in-out lg:relative lg:translate-x-0 shadow-2xl lg:shadow-none",
+                "fixed inset-y-0 left-0 z-50 w-60 bg-card border-r border-border/50 transform transition-all duration-500 ease-in-out lg:relative lg:translate-x-0 shadow-2xl lg:shadow-none",
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="flex flex-col h-full">
@@ -113,6 +126,9 @@ export default function RootLayout({
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-primary group-hover:h-3 transition-all duration-300 rounded-r-full" />
                                 <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
                                 <span>{item.label}</span>
+                                {item.href === "/help" && unread > 0 && (
+                                    <span className="ml-auto bg-red-500 text-white text-[10px] font-black rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center">{unread}</span>
+                                )}
                             </a>
                         ))}
                     </nav>
@@ -193,10 +209,13 @@ export default function RootLayout({
                     </div>
                 </header>
                 {/* Page Content */}
-                <div className="flex-1 overflow-y-auto p-6 lg:p-10 bg-muted/30">
-                    <div className="max-w-7xl mx-auto">
+                {fullBleed ? (
+                    <div className="flex-1 min-h-0 bg-muted/30">{children}</div>
+                ) : (
+                <div className="flex-1 overflow-y-auto p-3 lg:p-5 bg-muted/30">
+                    <div className="w-full">
                         {children}
-                        <footer className="mt-20 pb-10 border-t border-border/50 pt-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <footer className="mt-10 pb-4 border-t border-border/50 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
                             <p className="text-muted-foreground text-sm font-medium">
                                 © {new Date().getFullYear()} WebFindLead. All rights reserved.
                             </p>
@@ -214,6 +233,7 @@ export default function RootLayout({
                         </footer>
                     </div>
                 </div>
+                )}
             </main>
             {/* Chatbot — Admin only until fully tested */}
             {mounted && status === 'authenticated' && session?.user?.role === 'ADMIN' && (

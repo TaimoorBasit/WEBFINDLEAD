@@ -23,11 +23,18 @@ export async function POST(req: Request) {
                 where: { id: userId },
                 data: { isBlocked: false },
             });
-        } else if (action === "ADD_LEADS") {
-            await prisma.user.update({
-                where: { id: userId },
-                data: { leadsBalance: { increment: Number(amount) } },
-            });
+        } else if (action === "ADD_LEADS" || action === "SUB_LEADS") {
+            const n = Math.floor(Number(amount));
+            if (!Number.isFinite(n) || n <= 0) {
+                return NextResponse.json({ message: "Amount must be a positive number" }, { status: 400 });
+            }
+            if (action === "ADD_LEADS") {
+                await prisma.user.update({ where: { id: userId }, data: { leadsBalance: { increment: n } } });
+            } else {
+                // Never go below 0
+                await prisma.user.updateMany({ where: { id: userId, leadsBalance: { gte: n } }, data: { leadsBalance: { decrement: n } } });
+                await prisma.user.updateMany({ where: { id: userId, leadsBalance: { lt: n } }, data: { leadsBalance: 0 } });
+            }
         } else if (action === "DELETE") {
             // Optional: Add safety check to prevent deleting self?
             if (userId === session.user.id) {
