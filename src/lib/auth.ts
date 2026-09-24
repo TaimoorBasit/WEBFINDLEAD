@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { expirePlanIfDue } from "@/lib/plan";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
@@ -91,6 +92,7 @@ export const authOptions: NextAuthOptions = {
             // Sync with DB to handle role updates/blocks/balance changes without re-login
             if (token.id) {
                 try {
+                    await expirePlanIfDue(token.id as string);
                     const freshUser = await prisma.user.findUnique({
                         where: { id: token.id as string },
                         select: { role: true, plan: true, leadsBalance: true, isBlocked: true, cardLast4: true, cardBrand: true, subscriptionStatus: true, planType: true, isVerified: true }

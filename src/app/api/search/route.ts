@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
+import { expirePlanIfDue } from '@/lib/plan';
 import { searchBusinesses, searchManyBusinesses } from '@/lib/serpapi';
 
 export const maxDuration = 300;
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. Check Subscription Logic
+    await expirePlanIfDue(session.user.id);
     const user = await prisma.user.findUnique({
         where: { id: session.user.id }
     });

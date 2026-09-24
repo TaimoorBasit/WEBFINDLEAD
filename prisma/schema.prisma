@@ -49,6 +49,7 @@ model User {
   couponUsed    String?   // promo code the user last activated a plan with
   couponUsedAt  DateTime? // when that promo was used
   plan          String?   // "FREE", "PRO_MONTHLY_20" (Legacy mapped to planType)
+  planExpiresAt DateTime? // when the current monthly plan ends (null = legacy, falls back to couponUsedAt + 30d)
   isBlocked     Boolean   @default(false)
   createdAt     DateTime  @default(now())
   isVerified    Boolean   @default(false)

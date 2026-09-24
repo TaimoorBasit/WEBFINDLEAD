@@ -198,6 +198,12 @@ export default function AdminDashboard({
                                             <span className="px-2 py-1 text-xs font-bold rounded-full bg-blue-50 text-blue-600">
                                                 {user.plan || 'Free'}
                                             </span>
+                                            {(() => {
+                                                const exp = user.planExpiresAt ? new Date(user.planExpiresAt) : user.couponUsedAt ? new Date(new Date(user.couponUsedAt).getTime() + 30 * 86400000) : null;
+                                                if (!exp || user.subscriptionStatus === 'trial') return null;
+                                                const done = user.subscriptionStatus === 'expired' || exp < new Date();
+                                                return <div className={`text-[10px] mt-1 whitespace-nowrap ${done ? 'text-red-500' : 'text-gray-400'}`} suppressHydrationWarning>{done ? 'Expired' : 'Expires'} {fmt(exp)}</div>;
+                                            })()}
                                         </td>
                                         <td className="p-3">
                                             {user.couponUsed ? (

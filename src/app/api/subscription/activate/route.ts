@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { addPlanMonth } from "@/lib/plan";
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
                 subscriptionStatus: 'active',
                 planType: planType,
                 leadsBalance: leadsAmount,
+                planExpiresAt: addPlanMonth(new Date()),
                 // Map legacy plan field too
                 ...(usedCode ? { couponUsed: usedCode, couponUsedAt: new Date() } : {}),
                 plan: planType === 'pro' ? 'PRO_MONTHLY_99' : 'PRO_MONTHLY_20'
