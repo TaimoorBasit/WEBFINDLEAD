@@ -25,6 +25,8 @@ import { Business, WebsiteStatus } from "./ResultsTable";
 import { Clock, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { aiPitch } from "@/lib/pitch";
+import { useSession } from "next-auth/react";
 
 
 interface BusinessCardProps {
@@ -37,17 +39,11 @@ interface BusinessCardProps {
 export default function BusinessCard({ business, onSave, onRemove, isSaved }: BusinessCardProps) {
     const [copied, setCopied] = useState(false);
 
-    const handleCopyPitch = () => {
-        let pitch = "";
-        if (business.websiteStatus === 'NO_WEBSITE') {
-            pitch = `Hi ${business.name} team, I noticed you don't have a website listed on Google Maps. I help local businesses build professional sites to get more customers. Would you be open to a 5-min chat?`;
-        } else if (business.websiteStatus === 'LOW_QUALITY') {
-            pitch = `Hi ${business.name} team, I saw your website and noticed it could use some modernization to better represent your brand. I specialize in refreshing local business sites for better results. Open to a quick chat?`;
-        } else {
-            pitch = `Hi ${business.name} team, I noticed you have a great business! I help companies like yours optimize their online presence and social media. Let me know if you'd like to see some ideas.`;
-        }
+    const { data: session } = useSession();
 
-        navigator.clipboard.writeText(pitch);
+    const handleCopyPitch = async () => {
+        const { subject, body } = await aiPitch(business, session?.user?.name, window.location.origin);
+        navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };

@@ -33,6 +33,8 @@ import {
     ArrowRight
 } from "lucide-react";
 import { normalizeMapsUrl } from "@/lib/url-utils";
+import { buildPitch, aiPitch } from "@/lib/pitch";
+import { useSession } from "next-auth/react";
 
 export type WebsiteStatus = 'NO_WEBSITE' | 'LOW_QUALITY' | 'GOOD' | 'PENDING';
 
@@ -84,6 +86,7 @@ export default function ResultsTable({
     emptyMessage = "No results found. Try a different search.",
     savedIds = []
 }: ResultsTableProps) {
+    const { data: session } = useSession();
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [visibleCount, setVisibleCount] = useState(100);
     const sentinelRef = useRef<HTMLTableRowElement | null>(null);
@@ -138,23 +141,15 @@ export default function ResultsTable({
         navigator.clipboard.writeText(text);
     };
 
-    const getPitch = (biz: Business) => {
-        const name = biz.name;
-        const status = biz.websiteStatus;
-        const auditLink = window.location.origin + '/audit/' + biz.id;
+    // AI pitches generated on click; the email link uses one if present, else the instant template
+    const [aiPitches, setAiPitches] = useState<Record<string, { subject: string; body: string }>>({});
+    const getPitch = (biz: Business) =>
+        aiPitches[biz.id] ?? buildPitch(biz, session?.user?.name, window.location.origin);
 
-        if (status === 'NO_WEBSITE') {
-            return `Hi ${name} team, I just ran a digital scan of your business and noticed you don't have a website yet. I've prepared a health report for you here: ${auditLink} - I specialize in helping local businesses get online and would love to help you fix this!`;
-        } else if (status === 'LOW_QUALITY') {
-            return `Hi ${name} team, I performed a technical audit on your website and found some critical performance issues. You can see the full report here: ${auditLink} - I'd love to help you optimize this for more customers!`;
-        } else {
-            return `Hi ${name} team, your website looks great, but I noticed you aren't currently using Ad Tracking (Pixels) to retarget your visitors. I've analyzed your setup here: ${auditLink} - Shall we chat about improving your ROI?`;
-        }
-    };
-
-    const copyPitch = (biz: Business) => {
-        const pitch = getPitch(biz);
-        navigator.clipboard.writeText(pitch);
+    const copyPitch = async (biz: Business) => {
+        const p = await aiPitch(biz, session?.user?.name, window.location.origin);
+        setAiPitches((prev) => ({ ...prev, [biz.id]: p }));
+        navigator.clipboard.writeText(`Subject: ${p.subject}\n\n${p.body}`);
         alert("Pitch copied to clipboard!");
     };
 
@@ -564,7 +559,7 @@ export default function ResultsTable({
                                                                 <div className="pt-2 border-t border-slate-200/50 flex flex-col gap-2">
                                                                     {biz.email ? (
                                                                         <a
-                                                                            href={`mailto:${biz.email}?subject=${encodeURIComponent(`Business Audit for ${biz.name}`)}&body=${encodeURIComponent(getPitch(biz))}`}
+                                                                            href={`mailto:${biz.email}?subject=${encodeURIComponent(getPitch(biz).subject)}&body=${encodeURIComponent(getPitch(biz).body)}`}
                                                                             className="flex-1 bg-primary hover:bg-primary/90 text-white py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all text-center"
                                                                         >
                                                                             <Mail className="w-3.5 h-3.5" /> One-Click Email Outreach
