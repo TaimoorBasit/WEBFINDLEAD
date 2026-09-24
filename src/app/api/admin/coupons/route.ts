@@ -11,7 +11,11 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const { code, percent, maxUses, validPlan } = await req.json();
+        const { code, percent, maxUses, validPlan, expiry } = await req.json();
+        const expiryDate = expiry ? new Date(expiry) : null;
+        if (expiryDate && isNaN(expiryDate.getTime())) {
+            return NextResponse.json({ error: "Invalid expiry date" }, { status: 400 });
+        }
 
         if (!code || !percent) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -23,6 +27,7 @@ export async function POST(req: NextRequest) {
                 percent: parseInt(percent),
                 maxUses: parseInt(maxUses) || 1,
                 validPlan: validPlan || "ALL",
+                expiry: expiryDate,
             },
         });
 

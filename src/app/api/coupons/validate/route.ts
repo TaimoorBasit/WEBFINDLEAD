@@ -21,6 +21,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ valid: false, error: "Coupon usage limit reached" }, { status: 400 });
         }
 
+        if (coupon.expiry && new Date(coupon.expiry) < new Date()) {
+            return NextResponse.json({ valid: false, error: "This coupon has expired." }, { status: 400 });
+        }
+
         // Check plan validity if planId is provided
         if (planId && coupon.validPlan && coupon.validPlan !== "ALL" && coupon.validPlan !== planId) {
             return NextResponse.json({ valid: false, error: `This coupon is only valid for the ${coupon.validPlan} plan.` }, { status: 400 });

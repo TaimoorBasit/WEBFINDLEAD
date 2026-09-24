@@ -22,7 +22,7 @@ export default function AdminDashboard({
     const [activeTab, setActiveTab] = useState<'USERS' | 'LEADS' | 'HELP' | 'COUPONS' | 'SETTINGS'>('USERS');
 
     // Coupon Form State
-    const [newCoupon, setNewCoupon] = useState({ code: '', percent: '', maxUses: '', validPlan: 'ALL' });
+    const [newCoupon, setNewCoupon] = useState({ code: '', percent: '', maxUses: '', validPlan: 'ALL', expiry: '' });
 
     // Password Form State
     const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -70,10 +70,11 @@ export default function AdminDashboard({
             const res = await fetch('/api/admin/coupons', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newCoupon),
+                // datetime-local is the admin's local time; send as ISO so the server doesn't read it as UTC
+                body: JSON.stringify({ ...newCoupon, expiry: newCoupon.expiry ? new Date(newCoupon.expiry).toISOString() : null }),
             });
             if (res.ok) {
-                setNewCoupon({ code: '', percent: '', maxUses: '', validPlan: 'ALL' });
+                setNewCoupon({ code: '', percent: '', maxUses: '', validPlan: 'ALL', expiry: '' });
                 router.refresh();
                 alert('Coupon Created');
             } else {
@@ -313,6 +314,15 @@ export default function AdminDashboard({
                                         <option value="Agency">Agency ($99)</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Expires (optional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={newCoupon.expiry}
+                                        onChange={(e) => setNewCoupon({ ...newCoupon, expiry: e.target.value })}
+                                        className="border p-2 rounded text-sm"
+                                    />
+                                </div>
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -334,12 +344,13 @@ export default function AdminDashboard({
                                         <th className="p-3 text-xs font-bold uppercase text-gray-600">Plan</th>
                                         <th className="p-3 text-xs font-bold uppercase text-gray-600">Uses</th>
                                         <th className="p-3 text-xs font-bold uppercase text-gray-600">Created</th>
+                                        <th className="p-3 text-xs font-bold uppercase text-gray-600">Expires</th>
                                         <th className="p-3 text-xs font-bold uppercase text-gray-600">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {coupons.length === 0 ? (
-                                        <tr><td colSpan={6} className="p-4 text-center text-gray-500">No active coupons</td></tr>
+                                        <tr><td colSpan={7} className="p-4 text-center text-gray-500">No active coupons</td></tr>
                                     ) : coupons.map((coupon) => (
                                         <tr key={coupon.id} className="border-b hover:bg-gray-50">
                                             <td className="p-3 font-mono font-bold text-blue-600">{coupon.code}</td>
@@ -352,6 +363,11 @@ export default function AdminDashboard({
                                             </td>
                                             <td className="p-3 text-xs text-gray-500">
                                                 {new Date(coupon.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="p-3 text-xs whitespace-nowrap" suppressHydrationWarning>
+                                                {coupon.expiry
+                                                    ? <span className={new Date(coupon.expiry) < new Date() ? 'text-red-500 font-bold' : 'text-gray-500'}>{new Date(coupon.expiry) < new Date() ? 'Expired ' : ''}{fmt(coupon.expiry)}</span>
+                                                    : <span className="text-gray-300">Never</span>}
                                             </td>
                                             <td className="p-3">
                                                 <button
