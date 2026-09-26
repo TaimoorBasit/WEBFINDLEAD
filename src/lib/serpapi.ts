@@ -65,16 +65,17 @@ async function serpApiSearch(query: string, location: string, start: number) {
 
 // Scrappa first, SerpAPI as fallback. No fake data: failures surface as errors.
 export async function searchBusinesses(query: string, location: string, start: number = 0) {
-    let lastError: unknown = new Error('No search API key configured (SCRAPPA_API_KEY / SERPAPI_API_KEY)');
+    const errors: string[] = [];
+    const why = (e: any) => e?.response?.data?.message || e?.response?.data?.error || e?.message;
     if (SCRAPPA_KEY) {
         try { return await scrappaSearch(query, location, start); }
-        catch (e) { console.error('Scrappa failed:', (e as any)?.response?.data || e); lastError = e; }
-    }
+        catch (e) { console.error('Scrappa failed:', why(e)); errors.push('Scrappa: ' + why(e)); }
+    } else errors.push('Scrappa: SCRAPPA_API_KEY not set');
     if (SERPAPI_KEY && !SERPAPI_KEY.includes('YOUR_SERPAPI_KEY_HERE')) {
         try { return await serpApiSearch(query, location, start); }
-        catch (e) { console.error('SerpAPI failed:', e); lastError = e; }
+        catch (e) { console.error('SerpAPI failed:', why(e)); errors.push('SerpAPI: ' + why(e)); }
     }
-    throw new Error('Search provider failed: ' + ((lastError as any)?.response?.data?.message || (lastError as Error).message));
+    throw new Error('Search failed. ' + errors.join(' | '));
 }
 
 /**
