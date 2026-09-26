@@ -177,7 +177,7 @@ export default function SearchPage() {
                 return;
             }
 
-            setError("Failed to fetch results. Please try again.");
+            setError(error.response?.data?.error || "Failed to fetch results. Please try again.");
             if (!isLoadMore) setResults([]);
         } finally {
             setLoading(false);
