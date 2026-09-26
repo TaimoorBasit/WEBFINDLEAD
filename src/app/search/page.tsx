@@ -458,6 +458,7 @@ export default function SearchPage() {
                                     <Target className="w-16 h-16 mx-auto mb-6" />
                                     <h3 className="text-xl font-black uppercase tracking-tighter italic">Ready to Scan</h3>
                                     <p className="font-medium text-slate-500 mt-2">Enter location & niche to find hidden gems.</p>
+                                    {error && <p className="font-bold text-red-500 mt-4 opacity-100">{error}</p>}
                                 </div>
                             )}
                         </div>
